@@ -1,4 +1,4 @@
-#  DSA Tracker API Documentation
+# 🚀 DSA Tracker API Documentation
 
 > **Complete API documentation for frontend developers**  
 > **Version**: 1.0.0 | **Last Updated**: Feb 2025
@@ -505,41 +505,80 @@ POST /api/admin/topics
   }
 }
 ```
-# 📚 Bulk Upload Topics API
-
-## 🔹 Endpoint
-
-POST `/api/admin/topics/bulk`
 
 ---
 
-## 🔐 Authorization
+#### Update Topic
+```http
+PATCH /api/admin/topics/:id
+```
+**🔒 Access**: Teacher or SuperAdmin only
 
-This route is protected.
+**URL Parameters:**
+- `id` (number) - Topic ID
 
-Required Header:
-
-Authorization: Bearer <JWT_TOKEN>
-
-Only **Admin / Teacher or Above** roles are allowed.
-
----
-
-## 📥 Request Body
-
-Content-Type: `application/json`
-
+**Request Body:**
 ```json
 {
-  "topics": [
-    "Arrays",
-    "Strings",
-    "Linked List",
-    "Stack",
-    "Queue",
-    "Trees"
-  ]
+  "topic_name": "Updated Topic Name"
 }
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Topic updated successfully",
+  "topic": {
+    "id": 1,
+    "topic_name": "Updated Topic Name",
+    "slug": "updated-topic-name",
+    "created_at": "2025-01-01T00:00:00.000Z",
+    "updated_at": "2025-02-01T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+#### Delete Topic
+```http
+DELETE /api/admin/topics/:id
+```
+**🔒 Access**: Teacher or SuperAdmin only
+
+**URL Parameters:**
+- `id` (number) - Topic ID
+
+**Success Response (200):**
+```json
+{
+  "message": "Topic deleted successfully"
+}
+```
+
+---
+
+#### Bulk Create Topics
+```http
+POST /api/admin/topics/bulk
+```
+**🔒 Access**: Teacher or SuperAdmin only
+
+**Request Body:**
+```json
+{
+  "topics": ["Arrays", "Linked Lists", "Trees", "Dynamic Programming"]
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "message": "Topics uploaded successfully",
+  "count": 4
+}
+```
+
 ---
 
 ### Questions Management
@@ -550,9 +589,13 @@ GET /api/admin/questions
 ```
 
 **Query Parameters (Optional):**
-- `topic_id` (number) - Filter by topic
+- `topicSlug` (string) - Filter by topic slug
 - `level` (string) - Filter by level (EASY, MEDIUM, HARD)
-- `platform` (string) - Filter by platform (LEETCODE, GFG, OTHER)
+- `platform` (string) - Filter by platform (LEETCODE, GFG, INTERVIEWBIT, OTHER)
+- `type` (string) - Filter by type (HOMEWORK, CLASSWORK)
+- `search` (string) - Search in question names
+- `page` (number) - Page number (default: 1)
+- `limit` (number) - Items per page (default: 10)
 
 **Success Response (200):**
 ```json
@@ -574,6 +617,139 @@ GET /api/admin/questions
         "slug": "arrays"
       }
     }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "totalPages": 5
+  }
+}
+```
+
+---
+
+#### Create Question
+```http
+POST /api/admin/questions
+```
+**🔒 Access**: Teacher or SuperAdmin only
+
+**Request Body:**
+```json
+{
+  "question_name": "Two Sum",
+  "question_link": "https://leetcode.com/problems/two-sum/",
+  "platform": "LEETCODE",
+  "level": "EASY",
+  "type": "HOMEWORK",
+  "topic_id": 1
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "message": "Question created successfully",
+  "question": {
+    "id": 1,
+    "question_name": "Two Sum",
+    "question_link": "https://leetcode.com/problems/two-sum/",
+    "platform": "LEETCODE",
+    "level": "EASY",
+    "type": "HOMEWORK",
+    "topic_id": 1,
+    "created_at": "2025-02-01T10:30:00.000Z",
+    "updated_at": "2025-02-01T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+#### Update Question
+```http
+PATCH /api/admin/questions/:id
+```
+**🔒 Access**: Teacher or SuperAdmin only
+
+**URL Parameters:**
+- `id` (number) - Question ID
+
+**Request Body:**
+```json
+{
+  "question_name": "Updated Two Sum",
+  "question_link": "https://leetcode.com/problems/two-sum/",
+  "platform": "LEETCODE",
+  "level": "MEDIUM",
+  "type": "CLASSWORK",
+  "topic_id": 1
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Question updated successfully",
+  "question": {
+    "id": 1,
+    "question_name": "Updated Two Sum",
+    "question_link": "https://leetcode.com/problems/two-sum/",
+    "platform": "LEETCODE",
+    "level": "MEDIUM",
+    "type": "CLASSWORK",
+    "topic_id": 1,
+    "created_at": "2025-01-01T00:00:00.000Z",
+    "updated_at": "2025-02-01T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+#### Delete Question
+```http
+DELETE /api/admin/questions/:id
+```
+**🔒 Access**: Teacher or SuperAdmin only
+
+**URL Parameters:**
+- `id` (number) - Question ID
+
+**Success Response (200):**
+```json
+{
+  "message": "Question deleted successfully"
+}
+```
+
+---
+
+#### Bulk Upload Questions
+```http
+POST /api/admin/questions/bulk-upload
+```
+**🔒 Access**: Teacher or SuperAdmin only
+
+**Request Body**: `multipart/form-data`
+- `file` (file) - CSV file with questions data
+
+**CSV Format:**
+```csv
+question_name,question_link,platform,level,type,topic_name
+Two Sum,https://leetcode.com/problems/two-sum/,LEETCODE,EASY,HOMEWORK,Arrays
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Bulk upload successful",
+  "uploaded": 50,
+  "failed": 2,
+  "errors": [
+    "Row 3: Invalid topic name",
+    "Row 7: Missing question link"
   ]
 }
 ```
@@ -623,7 +799,7 @@ GET /api/admin/:batchSlug/topics/:topicSlug/classes
   "classes": [
     {
       "id": 1,
-      "class_number": "Class 1",
+      "class_name": "Class 1",
       "class_date": "2025-02-01T10:00:00.000Z",
       "pdf_url": "https://example.com/class1.pdf",
       "description": "Introduction to Arrays",
@@ -656,10 +832,10 @@ POST /api/admin/:batchSlug/topics/:topicSlug/classes
 ```json
 {
   "class_name": "Class 3",
-  "class_date": "2025-02-15T10:00:00.000Z",
-  "pdf_url": "https://example.com/class3.pdf",
   "description": "Arrays Problem Solving",
-  "duration_minutes": 75
+  "pdf_url": "https://example.com/class3.pdf",
+  "duration_minutes": 75,
+  "class_date": "2025-02-15T10:00:00.000Z"
 }
 ```
 
@@ -669,7 +845,7 @@ POST /api/admin/:batchSlug/topics/:topicSlug/classes
   "message": "Class created successfully",
   "class": {
     "id": 3,
-    "class_number": "Class 3",
+    "class_name": "Class 3",
     "class_date": "2025-02-15T10:00:00.000Z",
     "pdf_url": "https://example.com/class3.pdf",
     "description": "Arrays Problem Solving",
@@ -698,7 +874,7 @@ GET /api/admin/:batchSlug/classes/:classSlug
 {
   "class": {
     "id": 1,
-    "class_number": "Class 1",
+    "class_name": "Class 1",
     "class_date": "2025-02-01T10:00:00.000Z",
     "pdf_url": "https://example.com/class1.pdf",
     "description": "Introduction to Arrays",
@@ -726,6 +902,67 @@ GET /api/admin/:batchSlug/classes/:classSlug
 
 ---
 
+#### Update Class
+```http
+PATCH /api/admin/:batchSlug/classes/:classSlug
+```
+**🔒 Access**: Teacher or SuperAdmin only
+
+**URL Parameters:**
+- `batchSlug` (string) - Batch slug
+- `classSlug` (string) - Class slug
+
+**Request Body:**
+```json
+{
+  "class_name": "Updated Class Name",
+  "description": "Updated description",
+  "pdf_url": "https://example.com/updated-class.pdf",
+  "duration_minutes": 90,
+  "class_date": "2025-02-20T10:00:00.000Z"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Class updated successfully",
+  "class": {
+    "id": 1,
+    "class_name": "Updated Class Name",
+    "class_date": "2025-02-20T10:00:00.000Z",
+    "pdf_url": "https://example.com/updated-class.pdf",
+    "description": "Updated description",
+    "duration_minutes": 90,
+    "created_at": "2025-01-01T00:00:00.000Z",
+    "updated_at": "2025-02-01T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+#### Delete Class
+```http
+DELETE /api/admin/:batchSlug/classes/:classSlug
+```
+**🔒 Access**: Teacher or SuperAdmin only
+
+**URL Parameters:**
+- `batchSlug` (string) - Batch slug
+- `classSlug` (string) - Class slug
+
+**Success Response (200):**
+```json
+{
+  "message": "Class deleted successfully"
+}
+```
+
+---
+
+### Question Assignment Management
+
 #### Assign Questions to Class
 ```http
 POST /api/admin/:batchSlug/classes/:classSlug/questions
@@ -747,7 +984,42 @@ POST /api/admin/:batchSlug/classes/:classSlug/questions
 ```json
 {
   "message": "Questions assigned successfully",
-  "assigned_count": 5
+  "assigned_count": 5,
+  "duplicate_count": 0
+}
+```
+
+---
+
+#### Get Assigned Questions of Class
+```http
+GET /api/admin/:batchSlug/classes/:classSlug/questions
+```
+
+**URL Parameters:**
+- `batchSlug` (string) - Batch slug
+- `classSlug` (string) - Class slug
+
+**Success Response (200):**
+```json
+{
+  "questions": [
+    {
+      "id": 1,
+      "question_name": "Two Sum",
+      "question_link": "https://leetcode.com/problems/two-sum/",
+      "platform": "LEETCODE",
+      "level": "EASY",
+      "type": "HOMEWORK",
+      "topic": {
+        "id": 1,
+        "topic_name": "Arrays",
+        "slug": "arrays"
+      },
+      "assigned_at": "2025-02-01T10:30:00.000Z"
+    }
+  ],
+  "total": 5
 }
 ```
 
@@ -834,7 +1106,7 @@ GET /api/student/classes/upcoming
   "upcoming_classes": [
     {
       "id": 1,
-      "class_number": "Class 1",
+      "class_name": "Class 1",
       "class_date": "2025-02-05T10:00:00.000Z",
       "pdf_url": "https://example.com/class1.pdf",
       "topic": {
@@ -846,6 +1118,13 @@ GET /api/student/classes/upcoming
       }
     }
   ]
+}
+```
+
+**Error Response (400):**
+```json
+{
+  "error": "Please complete your profile first"
 }
 ```
 
@@ -885,10 +1164,10 @@ GET /api/student/classes/upcoming
 }
 ```
 
-#### Validation Error
+#### File Upload Error
 ```json
 {
-  "error": "City name is required"
+  "error": "CSV file is required"
 }
 ```
 
@@ -898,12 +1177,12 @@ GET /api/student/classes/upcoming
 
 ### Role Access Levels
 
-| Role | Cities | Batches | Topics | Questions | Classes | Students |
-|------|--------|---------|--------|-----------|---------|----------|
-| **SUPERADMIN** | ✅ CRUD | ✅ CRUD | ✅ CRUD | ✅ CRUD | ✅ CRUD | ✅ View |
-| **TEACHER** | ❌ | ❌ | ✅ CRUD | ✅ CRUD | ✅ CRUD | ✅ View |
-| **INTERN** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ View |
-| **STUDENT** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ Own |
+| Role | Cities | Batches | Topics | Questions | Classes | Question Assignment |
+|------|--------|---------|--------|-----------|---------|-------------------|
+| **SUPERADMIN** | ✅ CRUD | ✅ CRUD | ✅ CRUD | ✅ CRUD | ✅ CRUD | ✅ CRUD |
+| **TEACHER** | ❌ | ❌ | ✅ CRUD | ✅ CRUD | ✅ CRUD | ✅ CRUD |
+| **INTERN** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **STUDENT** | ❌ | ❌ | ❌ | ❌ | ❌ View | ❌ |
 
 **Legend:**
 - ✅ CRUD = Create, Read, Update, Delete
@@ -947,7 +1226,18 @@ GET /api/student/classes/upcoming
          'Content-Type': 'application/json'
        },
        body: JSON.stringify(body)
-     })
+     }),
+     upload: (url, file) => {
+       const formData = new FormData();
+       formData.append('file', file);
+       return fetch(url, {
+         method: 'POST',
+         headers: {
+           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+         },
+         body: formData
+       });
+     }
    };
    ```
 
@@ -970,15 +1260,20 @@ GET /api/student/classes/upcoming
    - Login form (email/password)
    - Registration form (students)
 
-2. **Admin Dashboard**
+2. **SuperAdmin Dashboard**
    - Cities management (CRUD)
    - Batches management (CRUD)
-   - Topics management (CRUD)
-   - Questions management
-   - Class creation and assignment
+   - Admin creation
+   - System statistics
 
-3. **Student Dashboard**
-   - Analytics charts
+3. **Teacher Dashboard**
+   - Topics management (CRUD)
+   - Questions management (CRUD, Bulk Upload)
+   - Classes management (CRUD)
+   - Question assignment to classes
+
+4. **Student Dashboard**
+   - Analytics charts (weekly/monthly)
    - Upcoming classes
    - Progress tracking
 
@@ -988,6 +1283,7 @@ GET /api/student/classes/upcoming
 - Implement automatic token refresh
 - Cache frequently accessed data
 - Handle loading states properly
+- Implement file upload for bulk operations
 
 ---
 
@@ -1015,12 +1311,19 @@ curl -X POST http://localhost:5000/api/admin/batch-a/topics/arrays/classes \
   -H "Authorization: Bearer TEACHER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "class_number": "Class 1",
-    "class_date": "2025-02-01T10:00:00.000Z",
-    "pdf_url": "https://example.com/class1.pdf",
+    "class_name": "Class 1",
     "description": "Introduction to Arrays",
-    "duration_minutes": 60
+    "pdf_url": "https://example.com/class1.pdf",
+    "duration_minutes": 60,
+    "class_date": "2025-02-01T10:00:00.000Z"
   }'
+```
+
+### Bulk Upload Questions
+```bash
+curl -X POST http://localhost:5000/api/admin/questions/bulk-upload \
+  -H "Authorization: Bearer TEACHER_TOKEN" \
+  -F "file=@questions.csv"
 ```
 
 ### Assign Questions to Class
@@ -1040,11 +1343,11 @@ curl -X POST http://localhost:5000/api/admin/batch-a/classes/class-1/questions \
 - [x] SuperAdmin: Cities CRUD
 - [x] SuperAdmin: Batches CRUD  
 - [x] SuperAdmin: Admin creation
-- [x] Admin: Topics CRUD
-- [x] Admin: Questions viewing
+- [x] Admin: Topics CRUD (including bulk creation)
+- [x] Admin: Questions CRUD (including bulk upload)
 - [x] Admin: Classes CRUD
-- [x] Admin: Question assignment
-- [x] Student: Basic analytics
+- [x] Admin: Question assignment/removal
+- [x] Student: Basic analytics (weekly/monthly)
 - [x] Student: Upcoming classes
 
 ### 🚧 Coming Soon (Not Implemented)
@@ -1055,6 +1358,57 @@ curl -X POST http://localhost:5000/api/admin/batch-a/classes/class-1/questions \
 - [ ] Bookmark functionality
 - [ ] Advanced analytics
 - [ ] Search functionality
+
+---
+
+## 📄 Data Models Reference
+
+### Question Model
+```json
+{
+  "id": "number",
+  "question_name": "string",
+  "question_link": "string",
+  "platform": "LEETCODE | GFG | INTERVIEWBIT | OTHER",
+  "level": "EASY | MEDIUM | HARD",
+  "type": "HOMEWORK | CLASSWORK",
+  "topic_id": "number",
+  "created_at": "datetime",
+  "updated_at": "datetime",
+  "topic": {
+    "id": "number",
+    "topic_name": "string",
+    "slug": "string"
+  }
+}
+```
+
+### Class Model
+```json
+{
+  "id": "number",
+  "class_name": "string",
+  "class_date": "datetime",
+  "pdf_url": "string",
+  "description": "string",
+  "duration_minutes": "number",
+  "batch_id": "number",
+  "topic_id": "number",
+  "created_at": "datetime",
+  "updated_at": "datetime"
+}
+```
+
+### Topic Model
+```json
+{
+  "id": "number",
+  "topic_name": "string",
+  "slug": "string",
+  "created_at": "datetime",
+  "updated_at": "datetime"
+}
+```
 
 ---
 
