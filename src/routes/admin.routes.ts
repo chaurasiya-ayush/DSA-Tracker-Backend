@@ -25,8 +25,9 @@ import {  createQuestion, deleteQuestion, getAllQuestions,  updateQuestion } fro
 import { assignQuestionsToClass, getAssignedQuestionsOfClass, removeQuestionFromClass } from "../controllers/admin/questionVisibility.controller";
 import { upload } from "../middlewares/upload.middleware";
 import { bulkUploadQuestions } from "../controllers/admin/questionBulk.controller";
-
-
+import { updateStudentDetails, deleteStudentDetails }  from "../controllers/admin/student.controller"
+import { getAllStudentsController, getStudentReportController }  from "../controllers/admin/student.controller"
+import { createStudentController }  from "../controllers/admin/student.controller"
 // import {
 //   getStudentsForBatch,
 //   getStudentReport,
@@ -88,6 +89,18 @@ router.post(
 // router.get("students/:username", getStudentReport);
 // total solved  + hard + easy + medium + + topic wise how much + 
 
+
+// Student CRUD
+// Update
+
+router.patch(  "/students/:id",isTeacherOrAbove,isAdmin,updateStudentDetails);
+
+// Delete (Hard Delete)
+router.delete( "/students/:id",isTeacherOrAbove,isAdmin,deleteStudentDetails);
+
+router.get("/students", getAllStudentsController);
+router.get("/students/:username", getStudentReportController);
+router.post("/students", isTeacherOrAbove,createStudentController);
 
 // Everything below requires valid batchSlug
 router.use("/:batchSlug", resolveBatch);
@@ -152,6 +165,10 @@ router.delete(
 );
 
 
+// admin student detail // student delete // update 
+
+/* ---------- Students ---------- */
+    //student?batch-slug//
 
 
 // /* ---------- Analytics ---------- */
