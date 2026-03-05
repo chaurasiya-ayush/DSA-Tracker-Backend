@@ -22,7 +22,44 @@ export const assignQuestionsToClass = async (
         error: "Invalid class slug",
       });
     }
+
     const { question_ids } = req.body;
+
+    // Validation 1: Check if question_ids is provided
+    if (!question_ids) {
+      return res.status(400).json({
+        error: "question_ids field is required",
+      });
+    }
+
+    // Validation 2: Check if question_ids is an array
+    if (!Array.isArray(question_ids)) {
+      return res.status(400).json({
+        error: "question_ids must be an array",
+      });
+    }
+
+    // Validation 3: Check if array is not empty
+    if (question_ids.length === 0) {
+      return res.status(400).json({
+        error: "question_ids array cannot be empty",
+      });
+    }
+
+    // Validation 4: Check if all elements are numbers
+    if (!question_ids.every(id => typeof id === 'number' && id > 0)) {
+      return res.status(400).json({
+        error: "All question_ids must be positive numbers",
+      });
+    }
+
+    // Validation 5: Check for duplicate question IDs in request
+    const duplicateIds = question_ids.filter((id, index) => question_ids.indexOf(id) !== index);
+    if (duplicateIds.length > 0) {
+      return res.status(400).json({
+        error: `Duplicate question IDs found in request: ${duplicateIds.join(', ')}`,
+      });
+    }
 
     const result = await assignQuestionsToClassService({
       batchId: batch.id,
