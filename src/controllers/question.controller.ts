@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
-import prisma from "../../config/prisma";
-import { createQuestionService, deleteQuestionService, getAllQuestionsService, updateQuestionService } from "../../services/question.service";
 
-import { getAssignedQuestionsService } from "../../services/question.service";
+import { createQuestionService, deleteQuestionService, getAllQuestionsService, getAssignedQuestionsService, updateQuestionService } from "../services/question.service";
 
 
 

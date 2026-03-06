@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createCityService, deleteCityService, getAllCitiesService, updateCityService } from "../../services/city.service";
+import { createCityService, deleteCityService, getAllCitiesService, updateCityService } from "../services/city.service";
 
 // Create City
 export const createCity = async (req: Request, res: Response) => {

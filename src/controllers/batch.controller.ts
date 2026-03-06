@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createBatchService, deleteBatchService, getAllBatchesService, updateBatchService } from "../../services/batch.service";
+import { createBatchService, deleteBatchService, getAllBatchesService, updateBatchService } from "../services/batch.service";
 
 //  CREATE BATCH
 

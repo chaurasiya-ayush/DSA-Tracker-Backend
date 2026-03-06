@@ -2,13 +2,32 @@ import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { isStudent } from "../middlewares/role.middleware";
 import { extractStudentInfo } from "../middlewares/student.middleware";
-
-
-
+import { getTopicsWithBatchProgress, getTopicOverviewWithClassesSummary } from "../controllers/topic.controller";
+import { getClassDetailsWithFullQuestions } from "../controllers/class.controller";
+import { getAllQuestionsWithFilters } from "../controllers/questionVisibility.controller";
 
 const router = Router();
 
 // All routes require authentication + STUDENT role + student info extraction
 router.use(verifyToken, isStudent, extractStudentInfo);
+
+
+
+// ===== TOPICS ROUTES =====
+router.get("/topics", getTopicsWithBatchProgress); // All topics with batch-specific classes, total questions per batch, and topic-specific solved question count (frontend will calculate progress percentage)
+router.get("/topics/:topicSlug", getTopicOverviewWithClassesSummary); // Topic overview with classes summary (name, duration, totalQuestions, solvedQuestions)
+
+// ===== CLASSES ROUTES =====
+router.get("/topics/:topicSlug/classes/:classSlug", getClassDetailsWithFullQuestions); // Class details with full questions array & progress
+
+// ===== Global  QUESTIONS ROUTES =====
+router.get("/addedQuestions", getAllQuestionsWithFilters); // All questions with filters and solved status
+
+
+// ===== LEADERBOARD ROUTES =====
+router.get("/leaderboard", /* getLeaderboardByType */); // All leaderboard types with filters (type=global|city|batch|batch-city)
+
+
+
 
 export default router;

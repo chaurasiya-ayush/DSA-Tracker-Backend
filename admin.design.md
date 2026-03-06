@@ -71,6 +71,330 @@ const switchBatch = (batchSlug: string) => {
 
 ---
 
+## 🎯 Admin Portal Features
+
+### **📊 Dashboard Overview**
+- **Default Batch View**: Shows admin's assigned batch by default
+- **Quick Stats**: Student count, completion rates, activity metrics
+- **Recent Activity**: Latest submissions, student progress updates
+- **Batch Switcher**: Easy navigation between different batches
+
+### **👥 Student Management**
+- **Student CRUD**: Create, view, update, delete student profiles
+- **Bulk Operations**: Import students, batch assignments
+- **Progress Tracking**: Monitor individual and batch progress
+- **Performance Analytics**: Identify struggling students
+- **Progress Addition**: Add student progress manually
+- **Student Reports**: Detailed performance reports by username
+
+### **📚 Content Management**
+- **Topic Management**: Create and organize DSA topics
+- **Bulk Topic Operations**: Create multiple topics at once
+- **Class Scheduling**: Schedule classes per batch
+- **Question Bank**: Manage question database
+- **Question Assignment**: Assign questions to specific classes
+- **Bulk Question Upload**: Upload questions in bulk
+- **Resource Upload**: Upload study materials and solutions
+
+### **🏆 Leaderboard Management** ⭐ **NEW**
+- **View Leaderboard**: Real-time student rankings
+- **Leaderboard Analytics**: Performance metrics and statistics
+- **Manual Recalculation**: Recalculate leaderboard scores
+- **Batch-wise Rankings**: Filter leaderboards by batch
+- **City-wise Rankings**: Compare performance across cities
+- **Streak Tracking**: Monitor student solving streaks
+- **Difficulty Statistics**: Easy/Medium/Hard problem counts
+
+### **🔧 System Management**
+- **Platform Testing**: Test LeetCode and GFG integrations
+- **Progress Sync**: Manual synchronization of student progress
+- **Dashboard Analytics**: Comprehensive system analytics
+
+### **🏆 Batch Operations**
+- **Batch Creation**: Create new batches with city assignments
+- **Batch Switching**: Work with multiple batches seamlessly
+- **Default Context**: Admin's "home" batch for quick access
+- **Cross-Batch Analytics**: Compare performance across batches
+
+---
+
+## 🔧 API Design Patterns
+
+### **Global Routes (No Batch Context)**
+```typescript
+GET /api/admin/cities          // All cities
+GET /api/admin/batches         // All batches
+GET /api/admin/topics          // All topics
+POST /api/admin/topics         // Create topic
+POST /api/admin/topics/bulk    // Bulk create topics
+GET /api/admin/students        // All students across batches
+POST /api/admin/students       // Create student
+PATCH /api/admin/students/:id  // Update student
+DELETE /api/admin/students/:id // Delete student
+GET /api/admin/students/:username // Student report
+POST /api/admin/students/progress // Add student progress
+
+// Questions
+GET /api/admin/questions       // All questions
+POST /api/admin/questions      // Create question
+
+// Leaderboard ⭐ NEW
+GET /api/admin/leaderboard     // Get leaderboard
+POST /api/admin/leaderboard    // Leaderboard analytics
+POST /api/admin/leaderboard/recalculate // Recalculate scores
+
+// System
+GET /api/admin/dashboard       // Dashboard analytics
+POST /api/admin/test/leetcode/:username // Test LeetCode sync
+POST /api/admin/test/gfg/:username     // Test GFG sync
+POST /api/admin/progress/manual        // Manual progress sync
+```
+
+### **Batch-Specific Routes (With batchSlug)**
+```typescript
+GET /api/admin/:batchSlug/topics           // Topics for specific batch
+GET /api/admin/:batchSlug/topics/:topicSlug/classes  // Classes for batch+topic
+POST /api/admin/:batchSlug/topics/:topicSlug/classes // Create class for batch
+GET /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug // Get class
+PATCH /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug // Update class
+DELETE /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug // Delete class
+
+// Question Assignment
+POST /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions // Assign questions
+GET /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions // Get assigned questions
+DELETE /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions/:questionId // Remove question
+```
+
+### **Default Filtering (Future Enhancement)**
+```typescript
+// After migration - admin gets default context
+GET /api/admin/dashboard          // Shows admin's default batch
+GET /api/admin/analytics?batch=default  // Uses admin's default batch
+```
+
+---
+
+## 🎨 UI Components & Patterns
+
+### **Navigation Structure**
+```
+├── Dashboard (Default Batch View)
+├── Students Management
+│   ├── All Students
+│   ├── Add Student
+│   ├── Student Reports
+│   ├── Progress Management
+│   └── Bulk Import
+├── Content Management
+│   ├── Topics
+│   │   ├── Single Topic
+│   │   └── Bulk Create
+│   ├── Classes
+│   ├── Questions
+│   │   ├── Question Bank
+│   │   ├── Assignment Manager
+│   │   └── Bulk Upload
+│   └── Resources
+├── Leaderboard ⭐ NEW
+│   ├── View Rankings
+│   ├── Analytics
+│   ├── Recalculate Scores
+│   └── Filter by Batch/City
+├── Batch Operations
+│   ├── My Batch (Default)
+│   ├── All Batches
+│   └── Create Batch
+├── System Tools
+│   ├── Platform Testing
+│   ├── Progress Sync
+│   └── System Health
+└── Settings
+    ├── Profile
+    └── Analytics
+```
+
+### **Batch Context Indicator**
+```typescript
+// UI shows current batch context
+<BatchContext>
+  Current: SOT 2025 (Bangalore)
+  [Switch Batch ▼]
+</BatchContext>
+```
+
+### **Permission-Based UI**
+```typescript
+// Role-based feature access
+{user.role === 'SUPERADMIN' && <CreateBatchButton />}
+{user.role === 'TEACHER' && <ManageClassesButton />}
+{isTeacherOrAbove(user.role) && <CreateTopicButton />}
+{user.role === 'INTERN' && <ViewOnlyMode />}
+```
+
+### **Leaderboard Components ⭐ NEW**
+```typescript
+// Leaderboard display
+<LeaderboardTable>
+  <RankColumn />
+  <StudentColumn />
+  <StreakColumn />
+  <EasyCountColumn />
+  <MediumCountColumn />
+  <HardCountColumn />
+  <TotalScoreColumn />
+</LeaderboardTable>
+
+// Analytics dashboard
+<LeaderboardAnalytics>
+  <BatchFilter />
+  <CityFilter />
+  <DateRangeFilter />
+  <RecalculateButton />
+</LeaderboardAnalytics>
+```
+
+---
+
+## 🔄 Middleware Flow
+
+### **Admin Authentication Chain**
+```typescript
+1. verifyToken        // Validates JWT token
+2. isAdmin           // Checks admin role
+3. extractAdminInfo  // Adds default batch/city info (future)
+4. resolveBatch      // Adds batch context for batch-specific routes
+```
+
+### **Request Context**
+```typescript
+// Admin request object
+{
+  user: { id, email, role },
+  admin: { id, email, role },
+  defaultBatchId?: number,    // Future: from token
+  defaultBatchName?: string,  // Future: from token
+  batch?: Batch,              // From URL middleware
+}
+```
+
+---
+
+## 📱 Responsive Design
+
+### **Desktop Layout**
+- **Sidebar Navigation**: Fixed sidebar with all admin features
+- **Main Content Area**: Dynamic content based on selection
+- **Top Bar**: User info, batch context, notifications
+- **Leaderboard View**: Full-featured ranking tables with filters
+
+### **Mobile Layout**
+- **Bottom Navigation**: Essential features on mobile
+- **Collapsible Menu**: Hamburger menu for full navigation
+- **Swipe Gestures**: Navigate between batches and topics
+- **Compact Leaderboard**: Mobile-optimized ranking display
+
+### **Tablet Layout**
+- **Adaptive Sidebar**: Collapsible sidebar for more screen space
+- **Touch-Friendly**: Larger touch targets for tablet interaction
+- **Split View**: Leaderboard and analytics side by side
+
+---
+
+## 🎯 Key Benefits
+
+### **1. Personalized Experience**
+- Admin sees their "home" batch by default
+- Quick access to frequently used features
+- Contextual information based on admin's role
+
+### **2. Efficient Workflow**
+- Batch switching without page reload
+- Bulk operations for student management
+- Real-time updates and notifications
+- **Leaderboard automation** - Automatic score calculations
+
+### **3. Scalable Architecture**
+- Easy to add new batches and cities
+- Flexible role-based permissions
+- Modular component structure
+- **Extensible leaderboard system** - Easy to add new metrics
+
+### **4. Data-Driven Decisions**
+- Comprehensive analytics dashboard
+- Performance tracking across batches
+- Student progress insights
+- **Competitive insights** - Leaderboard analytics and trends
+
+### **5. Enhanced Student Engagement** ⭐ NEW
+- **Gamification**: Leaderboard rankings motivate students
+- **Performance Visibility**: Students can track their progress
+- **Healthy Competition**: Batch and city-wise comparisons
+- **Streak Tracking**: Encourages consistent practice
+
+---
+
+## 🚀 Future Enhancements
+
+### **Advanced Features**
+- **Real-time Notifications**: WebSocket updates for student activity
+- **Advanced Analytics**: Machine learning insights for performance
+- **Automated Reports**: Scheduled reports and exports
+- **Integration Hub**: Connect with external learning platforms
+- **Live Leaderboard**: Real-time updates during competitions
+
+### **UI/UX Improvements**
+- **Dark Mode**: Eye-friendly interface for long sessions
+- **Customizable Dashboard**: Drag-and-drop widget layout
+- **Keyboard Shortcuts**: Power user features
+- **Voice Commands**: Hands-free operation
+- **Leaderboard Widgets**: Embeddable ranking components
+
+### **Leaderboard Enhancements** ⭐ NEW
+- **Achievement Badges**: Unlockable achievements
+- **Team Competitions**: Batch vs batch challenges
+- **Historical Rankings**: Track progress over time
+- **Prediction Models**: AI-powered performance predictions
+- **Social Features**: Student profiles and achievements
+
+---
+
+## 📋 Development Checklist
+
+### **Core Features**
+- [x] Authentication system with JWT
+- [x] Role-based access control
+- [x] Batch-specific routing
+- [x] Student management CRUD
+- [x] Content management system
+- [x] Question assignment system
+- [x] Bulk operations (topics, questions)
+- [x] Dashboard analytics
+- [x] Progress tracking system
+
+### **Leaderboard System** ⭐ NEW
+- [x] Leaderboard data model (Leaderboard table)
+- [x] Student ranking calculations
+- [x] Difficulty-wise problem counts
+- [x] Streak tracking system
+- [x] Admin leaderboard endpoints
+- [x] Recalculation functionality
+- [x] Analytics and reporting
+
+### **System Integration**
+- [x] LeetCode integration testing
+- [x] GFG integration testing
+- [x] Manual progress synchronization
+- [x] Platform health monitoring
+
+### **Future Items**
+- [ ] Default batch filtering (post-migration)
+- [ ] Real-time dashboard updates
+- [ ] Mobile responsive design
+- [ ] Advanced analytics
+- [ ] Bulk import/export features
+- [ ] Live leaderboard updates
+- [ ] Achievement system
+
 ## 🎯 Design Philosophy
 
 ### **Modern & Professional**

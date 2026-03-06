@@ -207,3 +207,200 @@ export const deleteTopicService = async ({ id }: DeleteTopicInput) => {
 
   return true;
 };
+
+interface GetTopicsWithBatchProgressInput {
+  studentId: number;
+  batchId: number;
+}
+
+export const getTopicsWithBatchProgressService = async ({
+  studentId,
+  batchId,
+}: GetTopicsWithBatchProgressInput) => {
+  
+  // Get all topics with batch-specific classes and question counts
+  const topics = await prisma.topic.findMany({
+    include: {
+      classes: {
+        where: {
+          batch_id: batchId
+        },
+        include: {
+          questionVisibility: {
+            include: {
+              question: {
+                select: {
+                  id: true,
+                  topic_id: true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    orderBy: { created_at: 'asc' }
+  });
+
+  // Get student's solved questions for these topics
+  const topicIds = topics.map(topic => topic.id);
+  
+  const studentProgress = await prisma.studentProgress.findMany({
+    where: {
+      student_id: studentId,
+      question: {
+        topic_id: { in: topicIds }
+      }
+    },
+    include: {
+      question: {
+        select: {
+          topic_id: true
+        }
+      }
+    }
+  });
+
+  // Group solved questions by topic
+  const solvedByTopic = new Map<number, Set<number>>();
+  studentProgress.forEach(progress => {
+    const topicId = progress.question.topic_id;
+    if (!solvedByTopic.has(topicId)) {
+      solvedByTopic.set(topicId, new Set());
+    }
+    solvedByTopic.get(topicId)!.add(progress.question_id);
+  });
+
+  // Format response
+  const formattedTopics = topics.map((topic: any) => {
+    // Count unique questions assigned to this batch for this topic
+    const assignedQuestions = new Set<number>();
+    
+    topic.classes.forEach((cls: any) => {
+      cls.questionVisibility.forEach((qv: any) => {
+        // Only count questions that belong to this topic
+        if (qv.question.topic_id === topic.id) {
+          assignedQuestions.add(qv.question.id);
+        }
+      });
+    });
+
+    // Get solved questions for this topic
+    const solvedQuestions = solvedByTopic.get(topic.id) || new Set();
+
+    return {
+      id: topic.id,
+      topic_name: topic.topic_name,
+      slug: topic.slug,
+      batchSpecificData: {
+        totalClasses: topic.classes.length,
+        totalQuestions: assignedQuestions.size,
+        solvedQuestions: solvedQuestions.size
+      }
+    };
+  });
+
+  return formattedTopics;
+};
+
+// Student-specific service - get topic overview with classes summary
+interface GetTopicOverviewWithClassesSummaryInput {
+  studentId: number;
+  batchId: number;
+  topicSlug: string;
+}
+
+export const getTopicOverviewWithClassesSummaryService = async ({
+  studentId,
+  batchId,
+  topicSlug,
+}: GetTopicOverviewWithClassesSummaryInput) => {
+  
+  // Get topic with batch-specific classes
+  const topic = await prisma.topic.findFirst({
+    where: { slug: topicSlug },
+    include: {
+      classes: {
+        where: {
+          batch_id: batchId
+        },
+        include: {
+          questionVisibility: {
+            include: {
+              question: {
+                select: {
+                  id: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: { created_at: 'asc' }
+      }
+    }
+  });
+
+  if (!topic) {
+    throw new Error("Topic not found");
+  }
+
+  // Get student's solved questions for this topic
+  const studentProgress = await prisma.studentProgress.findMany({
+    where: {
+      student_id: studentId,
+      question: {
+        topic_id: topic.id
+      }
+    },
+    include: {
+      question: {
+        select: {
+          id: true
+        }
+      }
+    }
+  });
+
+  // Create a Set of solved question IDs for quick lookup
+  const solvedQuestionIds = new Set(
+    studentProgress.map(progress => progress.question_id)
+  );
+
+  // Format classes with summary data
+  const classesSummary = topic.classes.map((cls: any) => {
+    // Count total questions for this class
+    const totalQuestions = cls.questionVisibility.length;
+    
+    // Count solved questions for this class
+    const solvedQuestions = cls.questionVisibility.filter((qv: any) => 
+      solvedQuestionIds.has(qv.question.id)
+    ).length;
+
+    return {
+      id: cls.id,
+      class_name: cls.class_name,
+      slug: cls.slug,
+      duration_minutes: cls.duration_minutes,
+      description: cls.description,
+      totalQuestions,
+      solvedQuestions
+    };
+  });
+
+  // Calculate overall topic progress
+  const totalTopicQuestions = classesSummary.reduce((sum: number, cls: any) => sum + cls.totalQuestions, 0);
+  const totalSolvedQuestions = classesSummary.reduce((sum: number, cls: any) => sum + cls.solvedQuestions, 0);
+
+  return {
+    id: (topic as any).id,
+    topic_name: (topic as any).topic_name,
+    slug: (topic as any).slug,
+    description: (topic as any).description || null,
+    classes: classesSummary,
+    overallProgress: {
+      totalClasses: classesSummary.length,
+      totalQuestions: totalTopicQuestions,
+      solvedQuestions: totalSolvedQuestions
+    }
+  };
+};

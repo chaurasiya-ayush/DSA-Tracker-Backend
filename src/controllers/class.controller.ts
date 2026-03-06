@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createClassInTopicService, deleteClassService, getClassDetailsService, getClassesByTopicService, updateClassService } from "../../services/class.service";
+import { createClassInTopicService, deleteClassService, getClassDetailsService, getClassesByTopicService, updateClassService, getClassDetailsWithFullQuestionsService } from "../services/class.service";
 
 
 export const getClassesByTopic = async (
@@ -186,6 +186,40 @@ export const deleteClass = async (
   } catch (error: any) {
     return res.status(400).json({
       error: error.message,
+    });
+  }
+};
+
+// Student-specific controller - get class details with full questions array
+export const getClassDetailsWithFullQuestions = async (req: Request, res: Response) => {
+  try {
+    // Get student info from middleware (extractStudentInfo)
+    const studentId = (req as any).studentId;
+    const batchId = (req as any).batchId;
+    const { topicSlug, classSlug } = req.params;
+    
+    // Ensure slugs are strings (not string arrays)
+    const topic = Array.isArray(topicSlug) ? topicSlug[0] : topicSlug;
+    const cls = Array.isArray(classSlug) ? classSlug[0] : classSlug;
+
+    if (!studentId || !batchId || !topic || !cls) {
+      return res.status(400).json({
+        error: "Student authentication and topic/class slugs required",
+      });
+    }
+
+    const classDetails = await getClassDetailsWithFullQuestionsService({
+      studentId,
+      batchId,
+      topicSlug: topic,
+      classSlug: cls,
+    });
+
+    return res.json(classDetails);
+
+  } catch (error: any) {
+    return res.status(500).json({
+      error: error.message || "Failed to fetch class details",
     });
   }
 };

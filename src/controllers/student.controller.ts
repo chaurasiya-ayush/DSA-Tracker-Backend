@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import { addStudentProgressService } from "../../services/student.service";
+import { addStudentProgressService } from "../services/student.service";
 import {
     updateStudentDetailsService,
     deleteStudentDetailsService,
     getAllStudentsService,
     getStudentReportService
-} from "../../services/student.service";
+} from "../services/student.service";
 
-import { createStudentService } from "../../services/student.service";
+import { createStudentService } from "../services/student.service";
 export const updateStudentDetails = async (req: Request, res: Response) => {
     try {
 

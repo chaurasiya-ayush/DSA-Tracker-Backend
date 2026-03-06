@@ -416,3 +416,36 @@ export const googleLogin = async (req: Request, res: Response) => {
     res.status(401).json({ error: "Invalid Google token" });
   }
 };
+
+// Student Logout
+export const logoutStudent = async (req: Request, res: Response) => {
+  try {
+    // In a stateless JWT setup, logout is typically handled client-side
+    // by removing the token from storage. But we can provide a response
+    // to confirm the logout action.
+    
+    res.json({
+      message: "Student logout successful",
+      // Optionally, you could add token blacklisting here if needed
+    });
+  } catch (error) {
+    console.error("Student logout error:", error);
+    res.status(500).json({ error: "Logout failed" });
+  }
+};
+
+// Admin Logout
+export const logoutAdmin = async (req: Request, res: Response) => {
+  try {
+    // Similar to student logout, this is typically handled client-side
+    // by removing the token from storage.
+    
+    res.json({
+      message: "Admin logout successful",
+      // Optionally, you could add token blacklisting here if needed
+    });
+  } catch (error) {
+    console.error("Admin logout error:", error);
+    res.status(500).json({ error: "Logout failed" });
+  }
+};

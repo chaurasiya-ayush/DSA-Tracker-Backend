@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { syncOneStudent } from "../../services/progressSync.service";
+import { syncOneStudent } from "../services/progressSync.service";
 
 
 export async function manualSync(req: Request, res: Response) {

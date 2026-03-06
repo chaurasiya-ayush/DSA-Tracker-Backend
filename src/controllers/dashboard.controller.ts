@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getDashboardService } from "../../services/dashboard.service";
+import { getDashboardService } from "../services/dashboard.service";
 
 export const getDashboardController = async (req: Request, res: Response) => {
     try {

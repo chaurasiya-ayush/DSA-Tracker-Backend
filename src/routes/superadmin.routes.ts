@@ -8,7 +8,7 @@ import {
   getAllCities, 
   updateCity,
   deleteCity
-} from "../controllers/admin/city.controller";
+} from "../controllers/city.controller";
 
 // Batch controllers
 import { 
@@ -16,7 +16,7 @@ import {
   deleteBatch,
   getAllBatches,
   updateBatch, 
-} from "../controllers/admin/batch.controller";
+} from "../controllers/batch.controller";
 
 // Admin management
 import { registerAdmin } from "../controllers/auth.controller";

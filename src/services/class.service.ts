@@ -405,3 +405,114 @@ export const deleteClassService = async ({
 
   return true;
 };
+
+// Student-specific service - get class details with full questions array
+interface GetClassDetailsWithFullQuestionsInput {
+  studentId: number;
+  batchId: number;
+  topicSlug: string;
+  classSlug: string;
+}
+
+export const getClassDetailsWithFullQuestionsService = async ({
+  studentId,
+  batchId,
+  topicSlug,
+  classSlug,
+}: GetClassDetailsWithFullQuestionsInput) => {
+  
+  // Get class with topic and batch validation
+  const classData = await prisma.class.findFirst({
+    where: {
+      slug: classSlug,
+      batch_id: batchId,
+      topic: {
+        slug: topicSlug
+      }
+    },
+    include: {
+      topic: {
+        select: {
+          id: true,
+          topic_name: true,
+          slug: true
+        }
+      },
+      questionVisibility: {
+        include: {
+          question: {
+            include: {
+              topic: {
+                select: {
+                  id: true,
+                  topic_name: true,
+                  slug: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!classData) {
+    throw new Error("Class not found");
+  }
+
+  // Get student's solved questions for this class
+  const questionIds = classData.questionVisibility.map(qv => qv.question_id);
+  
+  const studentProgress = await prisma.studentProgress.findMany({
+    where: {
+      student_id: studentId,
+      question_id: { in: questionIds }
+    },
+    select: {
+      question_id: true,
+      solved_at: true
+    }
+  });
+
+  // Create a Set of solved question IDs for quick lookup
+  const solvedQuestionIds = new Set(
+    studentProgress.map(progress => progress.question_id)
+  );
+
+  // Format questions with full details and solved status
+  const questionsWithProgress = classData.questionVisibility.map((qv: any) => {
+    const question = qv.question;
+    return {
+      id: question.id,
+      question_name: question.question_name,
+      question_link: question.question_link,
+      platform: question.platform,
+      level: question.level,
+      type: question.type,
+      topic: question.topic,
+      isSolved: solvedQuestionIds.has(question.id),
+      solvedAt: solvedQuestionIds.has(question.id) 
+        ? studentProgress.find(p => p.question_id === question.id)?.solved_at
+        : null
+    };
+  });
+
+  // Calculate progress stats
+  const totalQuestions = questionsWithProgress.length;
+  const solvedQuestions = questionsWithProgress.filter(q => q.isSolved).length;
+
+  return {
+    id: classData.id,
+    class_name: classData.class_name,
+    slug: classData.slug,
+    description: classData.description,
+    duration_minutes: classData.duration_minutes,
+    pdf_url: classData.pdf_url,
+    class_date: classData.class_date,
+    created_at: classData.created_at,
+    topic: classData.topic,
+    totalQuestions,
+    solvedQuestions,
+    questions: questionsWithProgress
+  };
+};

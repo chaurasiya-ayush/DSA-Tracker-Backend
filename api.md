@@ -5,7 +5,7 @@
 
 ---
 
-## � Authentication & Token Structure
+## 🔐 Authentication & Token Structure
 
 ### **Student Login Response**
 ```http
@@ -42,6 +42,9 @@ Content-Type: application/json
     "is_profile_complete": true,
     "leetcode_id": "johnleetcode",
     "gfg_id": "johngfg",
+    "lc_total_solved": 45,
+    "gfg_total_solved": 32,
+    "last_synced_at": "2025-03-06T12:00:00Z",
     "defaultCityId": 1,
     "defaultCityName": "Bangalore",
     "defaultBatchId": 1,
@@ -127,6 +130,567 @@ Content-Type: application/json
 ```
 
 ---
+
+## 🎓 Student API Endpoints
+
+### **Authentication Required**
+All student endpoints require:
+```http
+Authorization: Bearer <student_access_token>
+```
+
+### **Topics & Classes**
+```http
+# Get all topics for student's batch
+GET /api/student/topics
+
+# Get specific topic with classes
+GET /api/student/topics/:slug
+
+# Get specific class with questions
+GET /api/student/classes/:slug
+```
+
+**Response Example:**
+```json
+[
+  {
+    "id": 1,
+    "topic_name": "Arrays",
+    "slug": "arrays",
+    "classes": [
+      {
+        "id": 1,
+        "class_name": "Arrays Basics",
+        "slug": "arrays-basics",
+        "questions": [...]
+      }
+    ],
+    "studentProgress": {
+      "completed": true,
+      "score": 85
+    }
+  }
+]
+```
+
+### **Questions**
+```http
+# Get questions for student's batch
+GET /api/student/questions
+
+# Get questions by difficulty
+GET /api/student/questions?difficulty=easy|medium|hard
+```
+
+### **Profile & Progress**
+```http
+# Get student profile
+GET /api/student/profile
+
+# Get student progress
+GET /api/student/progress
+
+# Update student profile
+PATCH /api/student/profile
+```
+
+### **Leaderboard**
+```http
+# Get leaderboard
+GET /api/student/leaderboard?type=global|city|batch|batch-city
+```
+
+---
+
+## 🛡️ Admin API Endpoints
+
+### **Authentication Required**
+All admin endpoints require:
+```http
+Authorization: Bearer <admin_access_token>
+```
+
+### **Global Routes (No Batch Context)**
+```http
+# Cities
+GET /api/admin/cities
+
+# Batches
+GET /api/admin/batches
+POST /api/admin/batches
+
+# Topics (Global)
+GET /api/admin/topics
+POST /api/admin/topics
+POST /api/admin/topics/bulk
+PATCH /api/admin/topics/:id
+DELETE /api/admin/topics/:id
+
+# Questions (Global Pool)
+GET /api/admin/questions
+POST /api/admin/questions
+PATCH /api/admin/questions/:id
+DELETE /api/admin/questions/:id
+
+# Students (All Batches)
+GET /api/admin/students
+POST /api/admin/students
+GET /api/admin/students/:username
+PATCH /api/admin/students/:id
+DELETE /api/admin/students/:id
+POST /api/admin/students/progress
+
+# Leaderboard ⭐ NEW
+GET /api/admin/leaderboard
+POST /api/admin/leaderboard
+POST /api/admin/leaderboard/recalculate
+
+# Dashboard & Analytics
+GET /api/admin/dashboard
+
+# System Tools
+POST /api/admin/test/leetcode/:username
+POST /api/admin/test/gfg/:username
+POST /api/admin/progress/manual
+```
+
+### **Batch-Specific Routes**
+```http
+# Topics for specific batch
+GET /api/admin/:batchSlug/topics
+
+# Classes for batch + topic
+GET /api/admin/:batchSlug/topics/:topicSlug/classes
+POST /api/admin/:batchSlug/topics/:topicSlug/classes
+GET /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug
+PATCH /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug
+DELETE /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug
+
+# Question assignment
+POST /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions
+GET /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions
+DELETE /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions/:questionId
+```
+
+---
+
+## 🏆 Leaderboard API ⭐ NEW
+
+### **Student Leaderboard**
+```http
+GET /api/student/leaderboard?type=global|city|batch|batch-city
+```
+
+**Response:**
+```json
+{
+  "type": "batch-city",
+  "studentRank": 5,
+  "totalCount": 120,
+  "leaderboard": [
+    {
+      "rank": 1,
+      "student": {
+        "id": 123,
+        "name": "Alice Johnson",
+        "username": "alice",
+        "city": "Bangalore",
+        "batch": "SOT 2025"
+      },
+      "stats": {
+        "totalSolved": 150,
+        "maxStreak": 25,
+        "easyCount": 60,
+        "mediumCount": 70,
+        "hardCount": 20
+      }
+    }
+  ]
+}
+```
+
+### **Admin Leaderboard Management**
+```http
+# Get leaderboard data
+GET /api/admin/leaderboard?batchId=1&cityId=1&limit=50
+
+# Get leaderboard analytics
+POST /api/admin/leaderboard
+Content-Type: application/json
+
+{
+  "batchId": 1,
+  "cityId": 1,
+  "dateRange": {
+    "start": "2025-03-01",
+    "end": "2025-03-06"
+  }
+}
+
+# Recalculate leaderboard scores
+POST /api/admin/leaderboard/recalculate
+Content-Type: application/json
+
+{
+  "batchId": 1,
+  "cityId": 1,
+  "forceRecalculate": true
+}
+```
+
+**Analytics Response:**
+```json
+{
+  "summary": {
+    "totalStudents": 120,
+    "activeStudents": 95,
+    "averageScore": 75.5,
+    "topPerformer": {
+      "name": "Alice Johnson",
+      "score": 285
+    }
+  },
+  "difficultyStats": {
+    "easy": { "solved": 1200, "total": 1500 },
+    "medium": { "solved": 800, "total": 1200 },
+    "hard": { "solved": 300, "total": 600 }
+  },
+  "batchComparison": [
+    {
+      "batchName": "SOT 2025",
+      "averageScore": 78.2,
+      "totalStudents": 45
+    }
+  ]
+}
+```
+
+---
+
+## 🔄 JWT Token Structure
+
+### **Student Token Payload**
+```json
+{
+  "id": 123,
+  "email": "student@example.com",
+  "role": "STUDENT",
+  "userType": "student",
+  "batchId": 1,
+  "batchName": "SOT 2025",
+  "batchSlug": "batch-sot-2025",
+  "cityId": 1,
+  "cityName": "Bangalore",
+  "iat": 1641234567,
+  "exp": 1641849367
+}
+```
+
+### **Admin Token Payload**
+```json
+{
+  "id": 456,
+  "email": "admin@example.com",
+  "role": "TEACHER",
+  "userType": "admin",
+  "iat": 1641234567,
+  "exp": 1641849367
+}
+```
+
+### **Future Admin Token (After Migration)**
+```json
+{
+  "id": 456,
+  "email": "admin@example.com",
+  "role": "TEACHER",
+  "userType": "admin",
+  "batchId": 1,
+  "batchName": "SOT 2025",
+  "batchSlug": "batch-sot-2025",
+  "cityId": 1,
+  "cityName": "Bangalore",
+  "iat": 1641234567,
+  "exp": 1641849367
+}
+```
+
+---
+
+## 🎯 Middleware Chain
+
+### **Student Routes**
+```typescript
+1. verifyToken        // Validate JWT
+2. isStudent          // Check student role
+3. extractStudentInfo // Add batch/city to request
+```
+
+### **Admin Routes**
+```typescript
+1. verifyToken        // Validate JWT
+2. isAdmin           // Check admin role
+3. extractAdminInfo  // Add default batch/city (future)
+4. resolveBatch      // Add batch context for /:batchSlug routes
+```
+
+---
+
+## 📊 Response Format
+
+### **Success Response**
+```json
+{
+  "data": [...],
+  "message": "Operation successful",
+  "totalCount": 100
+}
+```
+
+### **Error Response**
+```json
+{
+  "error": "Error message",
+  "code": "ERROR_CODE"
+}
+```
+
+### **Pagination**
+```json
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 100,
+    "totalPages": 5
+  }
+}
+```
+
+---
+
+## 🔍 Query Parameters
+
+### **Common Parameters**
+```http
+?page=1              // Page number
+?limit=20            // Items per page
+?search=keyword      // Search term
+?sort=field          // Sort field
+?order=asc|desc      // Sort order
+```
+
+### **Student-Specific**
+```http
+?difficulty=easy|medium|hard
+?status=solved|unsolved|attempted
+```
+
+### **Admin-Specific**
+```http
+?batchId=1           // Filter by batch
+?cityId=1            // Filter by city
+?role=TEACHER|INTERN|SUPERADMIN
+```
+
+### **Leaderboard-Specific** ⭐ NEW
+```http
+?type=global|city|batch|batch-city
+?batchId=1           // Filter by batch
+?cityId=1            // Filter by city
+?dateFrom=2025-03-01 // Date range start
+?dateTo=2025-03-06   // Date range end
+```
+
+---
+
+## 🚨 Error Codes
+
+| Code | Description |
+|------|-------------|
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 409 | Conflict |
+| 422 | Validation Error |
+| 500 | Internal Server Error |
+
+---
+
+## 🔧 Rate Limiting
+
+- **Student endpoints**: 100 requests per minute
+- **Admin endpoints**: 200 requests per minute
+- **Auth endpoints**: 10 requests per minute
+- **Leaderboard endpoints**: 50 requests per minute
+
+---
+
+## 📱 SDK Examples
+
+### **JavaScript/TypeScript**
+```typescript
+// Setup API client
+const api = axios.create({
+  baseURL: 'http://localhost:3000/api',
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+
+// Student API
+const topics = await api.get('/student/topics');
+const profile = await api.get('/student/profile');
+const leaderboard = await api.get('/student/leaderboard?type=batch');
+
+// Admin API
+const batches = await api.get('/admin/batches');
+const batchTopics = await api.get('/admin/batch-sot-2025/topics');
+const adminLeaderboard = await api.get('/admin/leaderboard');
+const analytics = await api.post('/admin/leaderboard', { batchId: 1 });
+```
+
+### **Python**
+```python
+import requests
+
+headers = {'Authorization': f'Bearer {token}'}
+
+# Student API
+topics = requests.get('http://localhost:3000/api/student/topics', headers=headers)
+profile = requests.get('http://localhost:3000/api/student/profile', headers=headers)
+leaderboard = requests.get('http://localhost:3000/api/student/leaderboard?type=batch', headers=headers)
+
+# Admin API
+batches = requests.get('http://localhost:3000/api/admin/batches', headers=headers)
+admin_leaderboard = requests.get('http://localhost:3000/api/admin/leaderboard', headers=headers)
+```
+
+---
+
+## 🔄 Refresh Token
+
+```http
+POST /api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "refresh_token_here"
+}
+```
+
+**Response:**
+```json
+{
+  "accessToken": "new_access_token_here"
+}
+```
+
+---
+
+## 📋 Testing
+
+### **Test Credentials**
+```json
+// Student
+{
+  "email": "student@example.com",
+  "password": "password123"
+}
+
+// Admin
+{
+  "email": "admin@example.com", 
+  "password": "password123"
+}
+```
+
+### **Postman Collection**
+Import the provided Postman collection for easy testing of all endpoints.
+
+---
+
+## 🚀 Deployment
+
+### **Environment Variables**
+```env
+DATABASE_URL=your_database_url
+JWT_SECRET=your_jwt_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+### **Health Check**
+```http
+GET /api/health
+```
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-03-06T12:00:00Z"
+}
+```
+
+---
+
+## 📊 Database Schema Updates
+
+### **New Leaderboard Model** ⭐ NEW
+```prisma
+model Leaderboard {
+  id           Int      @id @default(autoincrement())
+  student_id   Int      @unique
+  max_streak   Int      @default(0)
+  updated_at   DateTime @updatedAt
+  easy_count   Int      @default(0)
+  hard_count   Int      @default(0)
+  medium_count Int      @default(0)
+  student      Student  @relation(fields: [student_id], references: [id])
+}
+```
+
+### **Updated Student Model**
+```prisma
+model Student {
+  // ... existing fields
+  lc_total_solved     Int               @default(0)
+  gfg_total_solved    Int               @default(0)
+  last_synced_at      DateTime?
+  leaderboards        Leaderboard?
+  // ... other fields
+}
+```
+
+---
+
+## 🎯 Features Summary
+
+### **Student Features**
+- ✅ Batch-based content access
+- ✅ Personalized dashboard
+- ✅ Progress tracking
+- ✅ Leaderboard participation
+- ✅ Platform sync (LeetCode, GFG)
+
+### **Admin Features**
+- ✅ Student management (CRUD)
+- ✅ Content management (Topics, Classes, Questions)
+- ✅ Bulk operations
+- ✅ Leaderboard management
+- ✅ Analytics and reporting
+- ✅ System integration testing
+- ✅ Progress synchronization
+
+### **System Features**
+- ✅ JWT authentication
+- ✅ Role-based access control
+- ✅ Batch-specific routing
+- ✅ Real-time leaderboard calculations
+- ✅ Platform integrations
 
 ## �📋 Table of Contents
 

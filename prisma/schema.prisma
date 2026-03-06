@@ -85,12 +85,18 @@ model Admin {
 }
 
 model Topic {
-  id         Int        @id @default(autoincrement())
-  topic_name String     @unique @db.VarChar(150)
-  created_at DateTime   @default(now())
-  slug       String     @unique @db.VarChar(170)
-  classes    Class[]
-  questions  Question[]
+  id          Int      @id @default(autoincrement())
+  topic_name  String   @unique @db.VarChar(150)
+  slug        String   @unique @db.VarChar(80)
+  description String?  @db.Text
+  order       Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  classes     Class[]
+  questionVisibility QuestionVisibility[]
+
+  @@index([order])
 }
 
 model Question {

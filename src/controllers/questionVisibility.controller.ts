@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { assignQuestionsToClassService, getAssignedQuestionsOfClassService, removeQuestionFromClassService } from "../../services/questionVisibility.service";
+import { assignQuestionsToClassService, getAssignedQuestionsOfClassService, removeQuestionFromClassService, getAllQuestionsWithFiltersService } from "../services/questionVisibility.service";
 
 
 export const assignQuestionsToClass = async (
@@ -170,6 +170,57 @@ export const removeQuestionFromClass = async (
   } catch (error: any) {
     return res.status(400).json({
       error: error.message,
+    });
+  }
+};
+
+// Student-specific controller - get all questions with filters for student's batch
+export const getAllQuestionsWithFilters = async (req: Request, res: Response) => {
+  try {
+    // Get student info from middleware (extractStudentInfo)
+    const studentId = (req as any).studentId;
+    const batchId = (req as any).batchId;
+
+    if (!studentId || !batchId) {
+      return res.status(400).json({
+        error: "Student authentication required",
+      });
+    }
+
+    // Extract query parameters for filtering
+    const {
+      search,
+      topic,
+      level,
+      platform,
+      type,
+      solved,
+      page = '1',
+      limit = '20'
+    } = req.query;
+
+    const filters = {
+      search: search as string,
+      topic: topic as string,
+      level: level as string,
+      platform: platform as string,
+      type: type as string,
+      solved: solved as string,
+      page: parseInt(page as string),
+      limit: parseInt(limit as string)
+    };
+
+    const questions = await getAllQuestionsWithFiltersService({
+      studentId,
+      batchId,
+      filters
+    });
+
+    return res.json(questions);
+
+  } catch (error: any) {
+    return res.status(500).json({
+      error: error.message || "Failed to fetch questions",
     });
   }
 };

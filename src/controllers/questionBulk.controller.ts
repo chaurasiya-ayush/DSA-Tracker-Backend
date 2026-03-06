@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { bulkUploadQuestionsService } from "../../services/questionBulk.service";
+import { bulkUploadQuestionsService } from "../services/questionBulk.service";
 
 export const bulkUploadQuestions = async (
   req: Request,

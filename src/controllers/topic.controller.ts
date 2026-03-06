@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import prisma from "../../config/prisma";
-import { createTopicService, deleteTopicService, getAllTopicsService, getTopicsForBatchService, updateTopicService } from "../../services/topic.service";
+import prisma from "../config/prisma";
+import { createTopicService, deleteTopicService, getAllTopicsService, getTopicsForBatchService, updateTopicService, getTopicsWithBatchProgressService, getTopicOverviewWithClassesSummaryService } from "../services/topic.service";
+
 
 
 
@@ -129,6 +130,65 @@ export const createTopicsBulk = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       error: error.message,
+    });
+  }
+};
+
+// Student-specific controller - get topics with batch progress
+export const getTopicsWithBatchProgress = async (req: Request, res: Response) => {
+  try {
+    // Get student info from middleware (extractStudentInfo)
+    const studentId = (req as any).studentId;
+    const batchId = (req as any).batchId;
+
+    if (!studentId || !batchId) {
+      return res.status(400).json({
+        error: "Student authentication required",
+      });
+    }
+
+    const topics = await getTopicsWithBatchProgressService({
+      studentId,
+      batchId,
+    });
+
+    return res.json(topics);
+
+  } catch (error: any) {
+    return res.status(500).json({
+      error: error.message || "Failed to fetch topics with progress",
+    });
+  }
+};
+
+// Student-specific controller - get topic overview with classes summary
+export const getTopicOverviewWithClassesSummary = async (req: Request, res: Response) => {
+  try {
+    // Get student info from middleware (extractStudentInfo)
+    const studentId = (req as any).studentId;
+    const batchId = (req as any).batchId;
+    const { topicSlug } = req.params;
+    
+    // Ensure topicSlug is a string (not string array)
+    const slug = Array.isArray(topicSlug) ? topicSlug[0] : topicSlug;
+
+    if (!studentId || !batchId || !slug) {
+      return res.status(400).json({
+        error: "Student authentication and topic slug required",
+      });
+    }
+
+    const topicOverview = await getTopicOverviewWithClassesSummaryService({
+      studentId,
+      batchId,
+      topicSlug: slug,
+    });
+
+    return res.json(topicOverview);
+
+  } catch (error: any) {
+    return res.status(500).json({
+      error: error.message || "Failed to fetch topic overview",
     });
   }
 };
