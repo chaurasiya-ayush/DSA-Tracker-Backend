@@ -278,10 +278,7 @@ export const recalculateLeaderboardService = async () => {
 
         });
 
-        const score =
-            (hard * 20) +
-            (medium * 15) +
-            (easy * 10);
+        // Score is now calculated in real-time in the query, no need to store it
 
         // ---- MAX STREAK CALCULATION ----
 
@@ -332,7 +329,6 @@ export const recalculateLeaderboardService = async () => {
                 hard_count: hard,
                 medium_count: medium,
                 easy_count: easy,
-                score: score,
                 max_streak: maxStreak
             },
             create: {
@@ -340,7 +336,6 @@ export const recalculateLeaderboardService = async () => {
                 hard_count: hard,
                 medium_count: medium,
                 easy_count: easy,
-                score: score,
                 max_streak: maxStreak
             }
         });
