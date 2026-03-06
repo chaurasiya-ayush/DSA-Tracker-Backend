@@ -1,18 +1,15 @@
 import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { isAdmin, isTeacherOrAbove } from "../middlewares/role.middleware";
+import { extractAdminInfo } from "../middlewares/admin.middleware";
 import { resolveBatch } from "../middlewares/batch.middleware";
 
 // Global Controllers
 import { getAllCities } from "../controllers/admin/city.controller";
 import { getAllTopics, createTopic, updateTopic, deleteTopic } from "../controllers/admin/topic.controller";
 import { createBatch, getAllBatches } from "../controllers/admin/batch.controller";
-import { createTopicsBulk } from "../controllers/admin/topic.controller"
-// Workspace Controllers (inside same files)
-// import { getWorkspaceOverview, getBatchAnalytics, getLeaderboard } from "../controllers/admin/analytics.controller";
-
+import { createTopicsBulk }  from "../controllers/admin/topic.controller"
 import { getTopicsForBatch } from "../controllers/admin/topic.controller";
-
 import {
   createClassInTopic,
   getClassesByTopic,
@@ -20,8 +17,7 @@ import {
   updateClass,
   deleteClass,
 } from "../controllers/admin/class.controller";
-
-import { createQuestion, deleteQuestion, getAllQuestions, updateQuestion } from "../controllers/admin/question.controller";
+import {  createQuestion, deleteQuestion, getAllQuestions,  updateQuestion } from "../controllers/admin/question.controller";
 import { assignQuestionsToClass, getAssignedQuestionsOfClass, removeQuestionFromClass } from "../controllers/admin/questionVisibility.controller";
 import { upload } from "../middlewares/upload.middleware";
 import { bulkUploadQuestions } from "../controllers/admin/questionBulk.controller";
@@ -45,6 +41,7 @@ const router = Router();
 
 router.use(verifyToken);
 router.use(isAdmin);
+router.use(extractAdminInfo);  // Add admin info extraction
 
 /* ==========================================
    GLOBAL ROUTES (NO BATCH CONTEXT)
@@ -88,12 +85,6 @@ router.post(
 
 /* ---------- Students ---------- */
 
-// router.get("/students", getStudentsForBatch);
-// + count of solved + streak + + all filters city wise + batch wise
-// router.get("students/:username", getStudentReport);
-// total solved  + hard + easy + medium + + topic wise how much +
-
-
 // Student CRUD
 // Update
 
@@ -107,7 +98,7 @@ router.post("/leaderboard/recalculate", verifyToken,isAdmin,recalculateLeaderboa
 
 router.get("/questions", getAssignedQuestionsController);
 
-router.patch("/students/:id", isTeacherOrAbove, isAdmin, updateStudentDetails);
+router.patch("/students/:id",isTeacherOrAbove,isAdmin,updateStudentDetails);
 
 // Delete (Hard Delete)
 router.delete("/students/:id", isTeacherOrAbove, isAdmin, deleteStudentDetails);
@@ -116,9 +107,7 @@ router.get("/students", getAllStudentsController);
 router.get("/students/:username", getStudentReportController);
 router.post("/students", isTeacherOrAbove, createStudentController);
 
-router.post("/students/progress", isTeacherOrAbove, isAdmin, addStudentProgressController);
-
-
+router.post( "/students/progress", isTeacherOrAbove, isAdmin, addStudentProgressController);
 router.get("/test/leetcode/:username", testLeetcode);
 router.get("/test/gfg/:username", testGfg);
 router.post("/students/sync/:id", manualSync);
@@ -130,7 +119,6 @@ router.use("/:batchSlug", resolveBatch);
 
 /* ---------- Overview ---------- */
 
-// router.get("/:batchSlug/overview", getWorkspaceOverview);
 
 /* ---------- Topics ---------- */
 
@@ -186,14 +174,5 @@ router.delete(
   removeQuestionFromClass
 );
 
-// admin student detail // student delete // update 
-
-/* ---------- Analytics ---------- */
-//student?batch-slug//
-
-// /* ---------- Analytics ---------- */
-
-// router.get("/:batchSlug/analytics", getBatchAnalytics);
-// router.get("/:batchSlug/leaderboard", getLeaderboard);
 
 export default router;
