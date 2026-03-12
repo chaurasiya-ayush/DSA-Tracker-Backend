@@ -299,7 +299,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/students/topics/{topicSlug}:
+  /api/students/topics/{topic}:
     get:
       tags:
         - Students
@@ -308,7 +308,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: topicSlug
+        - name: topic
           in: path
           required: true
           schema:
@@ -330,7 +330,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/students/topics/{topicSlug}/classes/{classSlug}:
+  /api/students/topics/{topic}/classes/{class}:
     get:
       tags:
         - Students
@@ -339,13 +339,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: topicSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
           example: "arrays-strings"
-        - name: classSlug
+        - name: class
           in: path
           required: true
           schema:
@@ -2540,7 +2540,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   # Batch-specific Admin Routes
-  /api/admin/{batchSlug}/topics:
+  /api/admin/{batch:}/topics:
     get:
       tags:
         - Admin
@@ -2549,12 +2549,12 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
+            example: "so-batch-2025"
       responses:
         '200':
           description: Topics retrieved successfully
@@ -2576,7 +2576,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/admin/{batchSlug}/topics/{topicSlug}/classes:
+  /api/admin/{batch:}/topics/{topicSlug}/classes:
     get:
       tags:
         - Admin
@@ -2585,18 +2585,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
-        - name: topicSlug
+            example: "so-batch-2025"
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "arrays-strings"
       responses:
         '200':
           description: Classes retrieved successfully
@@ -2626,18 +2625,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
-        - name: topicSlug
+            example: "so-batch-2025"
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "arrays-strings"
       requestBody:
         required: true
         content:
@@ -2689,7 +2687,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/admin/{batchSlug}/topics/{topicSlug}/classes/{classSlug}:
+  /api/admin/{batch}/topics/{topic}/classes/{class}:
     get:
       tags:
         - Admin
@@ -2698,24 +2696,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
-        - name: topicSlug
+            example: "so-batch-2025"
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "arrays-strings"
-        - name: classSlug
-          in: path
-          required: true
-          schema:
-            type: string
-          example: "intro-arrays"
       responses:
         '200':
           description: Class details retrieved successfully
@@ -2740,24 +2731,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
-        - name: topicSlug
+            example: "so-batch-2025"
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "arrays-strings"
-        - name: classSlug
-          in: path
-          required: true
-          schema:
-            type: string
-          example: "intro-arrays"
       requestBody:
         required: true
         content:
@@ -2806,24 +2790,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
-        - name: topicSlug
+            example: "so-batch-2025"
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "arrays-strings"
-        - name: classSlug
-          in: path
-          required: true
-          schema:
-            type: string
-          example: "intro-arrays"
       responses:
         '200':
           description: Class deleted successfully
@@ -2844,7 +2821,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/admin/{batchSlug}/topics/{topicSlug}/classes/{classSlug}/questions:
+  /api/admin/{batch:}/topics/{topicSlug}/classes/{classSlug}/questions:
     post:
       tags:
         - Admin
@@ -2853,24 +2830,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
-        - name: topicSlug
+            example: "so-batch-2025"
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "arrays-strings"
-        - name: classSlug
-          in: path
-          required: true
-          schema:
-            type: string
-          example: "intro-arrays"
       requestBody:
         required: true
         content:
@@ -2928,24 +2898,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
-        - name: topicSlug
+            example: "so-batch-2025"
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "arrays-strings"
-        - name: classSlug
-          in: path
-          required: true
-          schema:
-            type: string
-          example: "intro-arrays"
       responses:
         '200':
           description: Assigned questions retrieved successfully
@@ -2967,7 +2930,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/admin/{batchSlug}/topics/{topicSlug}/classes/{classSlug}/questions/{questionId}:
+  /api/admin/{batch:}/topics/{topicSlug}/classes/{classSlug}/questions/{questionId}:
     delete:
       tags:
         - Admin
@@ -2976,23 +2939,24 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: batchSlug
+        - name: topic
           in: path
           required: true
           schema:
             type: string
-          example: "so-batch-2025"
+            example: "so-batch-2025"
         - name: topicSlug
           in: path
           required: true
           schema:
             type: string
-          example: "arrays-strings"
+            example: "arrays-strings"
         - name: classSlug
           in: path
           required: true
           schema:
             type: string
+            example: "intro-arrays"
           example: "intro-arrays"
         - name: questionId
           in: path
