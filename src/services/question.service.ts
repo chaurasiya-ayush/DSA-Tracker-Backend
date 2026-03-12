@@ -322,7 +322,12 @@ export const getAssignedQuestionsService = async (query: any) => {
     if (batch) {
 
       const batchExists = await prisma.batch.findUnique({
-        where: { batch_name: batch }
+        where: { 
+          batch_name: batch,
+          city: {
+            city_name: city
+          }
+        }
       });
 
       if (!batchExists) {

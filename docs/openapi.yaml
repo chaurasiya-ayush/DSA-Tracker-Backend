@@ -2988,6 +2988,13 @@ paths:
       description: Get all cities for system management with total batches and students count
       security:
         - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            description: "Search cities by name"
       responses:
         '200':
           description: Cities retrieved successfully
@@ -3261,9 +3268,6 @@ paths:
                 city_id:
                   type: integer
                   example: 1
-                slug:
-                  type: string
-                  example: "updated-batch"
       responses:
         '200':
           description: Batch updated successfully
@@ -3851,9 +3855,6 @@ paths:
                 city_id:
                   type: integer
                   example: 1
-                slug:
-                  type: string
-                  example: "updated-batch"
       responses:
         '200':
           description: Batch updated successfully
