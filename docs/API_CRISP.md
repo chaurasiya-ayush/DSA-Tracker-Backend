@@ -1,12 +1,9 @@
-# DSA Tracker Backend API Documentation
+# DSA Tracker API Documentation
 
 ## Authentication
 
-### Base URL: `/api/auth`
-
-#### Student Registration
-**Endpoint:** `POST /api/auth/student/register`
-Register a new student account.
+### Student Registration
+`POST /api/auth/student/register`
 
 **Request:**
 ```json
@@ -16,11 +13,11 @@ Register a new student account.
   "username": "string",
   "password": "string",
   "batch_id": "number",
-  "leetcode_id": "string (optional)",
-  "gfg_id": "string (optional)",
-  "github": "string (optional)",
-  "linkedin": "string (optional)",
-  "enrollment_id": "string (optional)"
+  "leetcode_id": "string",
+  "gfg_id": "string",
+  "github": "string",
+  "linkedin": "string",
+  "enrollment_id": "string"
 }
 ```
 
@@ -44,15 +41,14 @@ Register a new student account.
 }
 ```
 
-#### Student Login
-**Endpoint:** `POST /api/auth/student/login`
-Authenticate student and receive JWT tokens.
+### Student Login
+`POST /api/auth/student/login`
 
 **Request:**
 ```json
 {
-  "email": "string (optional)",
-  "username": "string (optional)",
+  "email": "string",
+  "username": "string",
   "password": "string"
 }
 ```
@@ -78,9 +74,8 @@ Authenticate student and receive JWT tokens.
 }
 ```
 
-#### Student Logout
-**Endpoint:** `POST /api/auth/student/logout`
-Logout student and invalidate refresh token.
+### Student Logout
+`POST /api/auth/student/logout`
 
 **Headers:** `Authorization: Bearer <access_token>`
 
@@ -91,15 +86,13 @@ Logout student and invalidate refresh token.
 }
 ```
 
-#### Admin Login
-**Endpoint:** `POST /api/auth/admin/login`
-Authenticate admin (SuperAdmin, Teacher, Intern) and receive JWT tokens.
+### Admin Login
+`POST /api/auth/admin/login`
 
 **Request:**
 ```json
 {
-  "email": "string (optional)",
-  "username": "string (optional)",
+  "email": "string",
   "password": "string"
 }
 ```
@@ -126,8 +119,7 @@ Authenticate admin (SuperAdmin, Teacher, Intern) and receive JWT tokens.
 ```
 
 #### Admin Logout
-**Endpoint:** `POST /api/auth/admin/logout`
-Logout admin and invalidate refresh token.
+`POST /api/auth/admin/logout`
 
 **Headers:** `Authorization: Bearer <access_token>`
 
@@ -138,69 +130,155 @@ Logout admin and invalidate refresh token.
 }
 ```
 
+#### Google Login
+`POST /api/auth/google-login`
+
+**Request:**
+```json
+{
+  "idToken": "google_id_token_here"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Google login successful",
+  "user": {
+    "id": 1,
+    "email": "user@gmail.com",
+    "username": "user123",
+    "role": "STUDENT",
+    "userType": "student",
+    "batchId": 1,
+    "batchSlug": "batch-2024",
+    "cityId": 1
+  },
+  "tokens": {
+    "accessToken": "jwt_token_here",
+    "refreshToken": "refresh_token_here"
+  }
+}
+```
+
+#### Refresh Token
+`POST /api/auth/refresh-token`
+
+**Request:**
+```json
+{
+  "refreshToken": "refresh_token_here"
+}
+```
+
+**Response:**
+```json
+{
+  "accessToken": "new_jwt_token_here"
+}
+```
+
+#### Admin Registration (SuperAdmin Only)
+`POST /api/auth/admin/register`
+
+**Request:**
+```json
+{
+  "name": "Admin User",
+  "email": "admin@example.com",
+  "password": "password123",
+  "role": "TEACHER|INTERN",
+  "batch_id": 1
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Admin registered successfully",
+  "admin": {
+    "id": 2,
+    "name": "Admin User",
+    "email": "admin@example.com",
+    "role": "TEACHER",
+    "batch_id": 1,
+    "city_id": 1
+  }
+}
+```
+
 ---
 
 ## Student APIs
 
-### Base URL: `/api/students`
+### Get Topics with Batch Progress
+`GET /api/students/topics`
 
-All endpoints require `Authorization: Bearer <access_token>` header.
-
-#### Get Topics with Batch Progress
-**Endpoint:** `GET /api/students/topics`
-Get all topics with batch-specific classes and progress information.
+**Headers:** `Authorization: Bearer <access_token>`
 
 **Response:**
 ```json
-{
-  "topics": [
-    {
-      "id": 1,
-      "topic_name": "Arrays",
-      "slug": "arrays",
-      "description": "Array data structures and algorithms",
-      "classes": [
-        {
-          "id": 1,
-          "class_name": "Basic Arrays",
-          "slug": "basic-arrays",
-          "duration": "2 hours",
-          "totalQuestions": 10,
-          "solvedQuestions": 7
-        }
-      ],
-      "totalQuestions": 25,
-      "solvedQuestions": 15
+[
+  {
+    "id": 1,
+    "topic_name": "Intro to DataStructure and Algorithms",
+    "slug": "intro-to-datastructure-and-algorithms",
+    "batchSpecificData": {
+      "totalClasses": 4,
+      "totalQuestions": 3,
+      "solvedQuestions": 2
     }
-  ]
-}
+  },
+  {
+    "id": 2,
+    "topic_name": "Calculating Iterations",
+    "slug": "calculating-iterations",
+    "batchSpecificData": {
+      "totalClasses": 0,
+      "totalQuestions": 0,
+      "solvedQuestions": 0
+    }
+  }
+]
 ```
 
-#### Get Topic Overview
-**Endpoint:** `GET /api/students/topics/:topicSlug`
-Get detailed overview of a specific topic with classes summary.
+### Get Topic Overview
+`GET /api/students/topics/:topicSlug`
+
+**Headers:** `Authorization: Bearer <access_token>`
 
 **Response:**
 ```json
 {
-  "topic": {
-    "id": 1,
-    "topic_name": "Arrays",
-    "slug": "arrays",
-    "description": "Array data structures and algorithms",
-    "totalQuestions": 25,
-    "solvedQuestions": 15
-  },
+  "id": 13,
+  "topic_name": "Maths Primes",
+  "slug": "maths-primes",
+  "description": null,
   "classes": [
     {
-      "id": 1,
-      "class_name": "Basic Arrays",
-      "slug": "basic-arrays",
-      "duration": "2 hours",
-      "totalQuestions": 10,
-      "solvedQuestions": 7
+      "id": 2115,
+      "class_name": "Topic-13-Batch-8-Class-1",
+      "slug": "maths-primes-sot-class-1",
+      "duration_minutes": 85,
+      "description": "Comprehensive coverage of Maths Primes concepts for SOT",
+      "totalQuestions": 4,
+      "solvedQuestions": 2
+    },
+    {
+      "id": 2116,
+      "class_name": "Topic-13-Batch-8-Class-2",
+      "slug": "maths-primes-sot-class-2",
+      "duration_minutes": 97,
+      "description": "Maths Primes fundamentals and advanced topics",
+      "totalQuestions": 3,
+      "solvedQuestions": 1
     }
-  ]
+  ],
+  "overallProgress": {
+    "totalClasses": 2,
+    "totalQuestions": 7,
+    "solvedQuestions": 3
+  }
 }
 ```
 
@@ -211,30 +289,53 @@ Get detailed class information with all questions and progress.
 **Response:**
 ```json
 {
-  "class": {
-    "id": 1,
-    "class_name": "Basic Arrays",
-    "slug": "basic-arrays",
-    "duration": "2 hours",
-    "description": "Introduction to arrays"
+  "id": 1870,
+  "class_name": "Topic-21-Batch-9-Class-1",
+  "slug": "two-pointers-sot-class-1",
+  "description": "Deep dive into Two Pointers problem-solving techniques",
+  "duration_minutes": 66,
+  "pdf_url": null,
+  "class_date": "2025-09-07T06:01:42.699Z",
+  "created_at": "2026-03-13T08:58:21.448Z",
+  "topic": {
+    "id": 21,
+    "topic_name": "Two Pointers",
+    "slug": "two-pointers"
   },
+  "totalQuestions": 5,
+  "solvedQuestions": 1,
   "questions": [
     {
-      "id": 1,
-      "question_name": "Two Sum",
-      "level": "EASY",
-      "platform": "LEETCODE",
-      "platform_question_id": "1",
-      "link": "https://leetcode.com/problems/two-sum/",
+      "id": 253,
+      "questionName": "Count pairs with given sum",
+      "questionLink": "https://www.geeksforgeeks.org/problems/count-pairs-with-given-sum--150253/1?itm_source=geeksforgeeks&itm_medium=article&itm_campaign=practice_card",
+      "platform": "GFG",
+      "level": "MEDIUM",
+      "type": "HOMEWORK",
+      "topic": {
+        "id": 21,
+        "topic_name": "Two Pointers",
+        "slug": "two-pointers"
+      },
       "isSolved": true,
-      "solvedAt": "2024-01-01T10:00:00.000Z"
+      "syncAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "id": 264,
+      "questionName": "Container With Most Water",
+      "questionLink": "https://leetcode.com/problems/container-with-most-water/description/",
+      "platform": "LEETCODE",
+      "level": "MEDIUM",
+      "type": "CLASSWORK",
+      "topic": {
+        "id": 21,
+        "topic_name": "Two Pointers",
+        "slug": "two-pointers"
+      },
+      "isSolved": false,
+      "syncAt": null
     }
-  ],
-  "progress": {
-    "totalQuestions": 10,
-    "solvedQuestions": 7,
-    "completionPercentage": 70
-  }
+  ]
 }
 ```
 
@@ -243,40 +344,72 @@ Get detailed class information with all questions and progress.
 Get all questions with filtering options and solved status.
 
 **Query Parameters:**
-- `level`: Filter by difficulty (EASY, MEDIUM, HARD)
-- `platform`: Filter by platform (LEETCODE, GFG, CODESTUDIO)
+- `search`: Search by question name
 - `topic`: Filter by topic name
-- `solved`: Filter by solved status (true/false)
+- `level`: Filter by difficulty (EASY, MEDIUM, HARD)
+- `platform`: Filter by platform (LEETCODE, GFG, INTERVIEWBIT, OTHER)
+- `type`: Filter by question type (HOMEWORK, CLASSWORK)
+- `status`: Filter by solved status (solved, unsolved)
 - `page`: Page number (default: 1)
 - `limit`: Items per page (default: 20)
 
-**Example:** `GET /api/students/addedQuestions?level=EASY&solved=true&page=1&limit=10`
+**Example:** `GET /api/students/addedQuestions?level=EASY&status=solved&page=1&limit=10`
 
 **Response:**
 ```json
 {
   "questions": [
     {
-      "id": 1,
-      "question_name": "Two Sum",
-      "level": "EASY",
+      "id": 36,
+      "question_name": "Sum of All Odd Length Subarrays",
+      "question_link": "https://leetcode.com/problems/sum-of-all-odd-length-subarrays/",
       "platform": "LEETCODE",
-      "platform_question_id": "1",
-      "link": "https://leetcode.com/problems/two-sum/",
+      "level": "MEDIUM",
+      "type": "HOMEWORK",
+      "topic_id": 10,
+      "created_at": "2026-03-11T18:34:10.307Z",
       "topic": {
-        "id": 1,
-        "topic_name": "Arrays",
-        "slug": "arrays"
+        "id": 10,
+        "topic_name": "Subarray",
+        "slug": "subarray"
       },
       "isSolved": true,
-      "solvedAt": "2024-01-01T10:00:00.000Z"
+      "syncAt": "2026-03-13T10:19:16.766Z"
     }
   ],
   "pagination": {
     "page": 1,
-    "limit": 10,
-    "total": 50,
-    "totalPages": 5
+    "limit": 20,
+    "totalQuestions": 1,
+    "totalPages": 1
+  },
+  "filters": {
+    "topics": [
+      {
+        "id": 10,
+        "topic_name": "Subarray",
+        "slug": "subarray"
+      }
+    ],
+    "levels": [
+      "EASY",
+      "MEDIUM",
+      "HARD"
+    ],
+    "platforms": [
+      "LEETCODE",
+      "GFG",
+      "OTHER",
+      "INTERVIEWBIT"
+    ],
+    "types": [
+      "HOMEWORK",
+      "CLASSWORK"
+    ]
+  },
+  "stats": {
+    "total": 1,
+    "solved": 1
   }
 }
 ```
@@ -294,9 +427,13 @@ Get leaderboard with top 10 students and student's personal rank.
 }
 ```
 
+**Query Parameters:**
+- `username`: Search by username (optional)
+
 **Response:**
 ```json
 {
+  "success": true,
   "top10": [
     {
       "student_id": 1,
@@ -325,6 +462,7 @@ Get leaderboard with top 10 students and student's personal rank.
     "hard_solved": 32.1,
     "total_solved": 52.07
   },
+  "message": null,
   "filters": {
     "city": "all",
     "year": 2024,
@@ -343,17 +481,17 @@ Get complete student profile with all sections.
 ```json
 {
   "student": {
-    "name": "John Doe",
-    "username": "johndoe",
-    "email": "john@example.com",
+    "name": "Dhruv",
+    "username": "dhruv244",
+    "email": "dhruv@example.com",
     "enrollmentId": "ENR123",
-    "city": "New York",
-    "batch": "Batch 2024",
-    "year": 2024,
-    "github": "johndoe",
-    "linkedin": "https://linkedin.com/in/johndoe",
-    "leetcode": "john123",
-    "gfg": "john456"
+    "city": "Noida",
+    "batch": "SOT",
+    "year": 2025,
+    "github": "dhruv244",
+    "linkedin": "https://linkedin.com/in/dhruv244",
+    "leetcode": "dhruv608",
+    "gfg": "dhruv608"
   },
   "codingStats": {
     "totalSolved": 243,
@@ -373,23 +511,43 @@ Get complete student profile with all sections.
   },
   "streak": {
     "currentStreak": 1,
-    "maxStreak": 5
+    "maxStreak": 1
   },
   "leaderboard": {
-    "globalRank": 15,
-    "cityRank": 3
+    "globalRank": 3,
+    "cityRank": 1
   },
   "heatmap": [
     {
-      "date": "2024-01-01T00:00:00.000Z",
-      "count": 5
+      "date": "2026-03-13T00:00:00.000Z",
+      "count": 243
     }
   ],
   "recentActivity": [
     {
-      "problemTitle": "Two Sum",
+      "problemTitle": "Word Search",
+      "difficulty": "MEDIUM",
+      "solvedAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "problemTitle": "Subsets II",
+      "difficulty": "MEDIUM",
+      "solvedAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "problemTitle": "Generate Parentheses",
       "difficulty": "EASY",
-      "solvedAt": "2024-01-01T10:00:00.000Z"
+      "solvedAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "problemTitle": "House Robber",
+      "difficulty": "MEDIUM",
+      "solvedAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "problemTitle": "Unique Paths",
+      "difficulty": "EASY",
+      "solvedAt": "2026-03-13T10:20:17.300Z"
     }
   ]
 }
@@ -403,15 +561,15 @@ Get public student profile by username (no authentication required).
 ```json
 {
   "student": {
-    "name": "John Doe",
-    "username": "johndoe",
-    "city": "New York",
-    "batch": "Batch 2024",
-    "year": 2024,
-    "github": "johndoe",
-    "linkedin": "https://linkedin.com/in/johndoe",
-    "leetcode": "john123",
-    "gfg": "john456"
+    "name": "Dhruv",
+    "username": "dhruv244",
+    "city": "Noida",
+    "batch": "SOT",
+    "year": 2025,
+    "github": "dhruv244",
+    "linkedin": "https://linkedin.com/in/dhruv244",
+    "leetcode": "dhruv608",
+    "gfg": "dhruv608"
   },
   "codingStats": {
     "totalSolved": 243,
@@ -429,15 +587,45 @@ Get public student profile by username (no authentication required).
       "solved": 21
     }
   },
-  "leaderboard": {
-    "globalRank": 15,
-    "cityRank": 3
+  "streak": {
+    "currentStreak": 1,
+    "maxStreak": 1
   },
+  "leaderboard": {
+    "globalRank": 3,
+    "cityRank": 1
+  },
+  "heatmap": [
+    {
+      "date": "2026-03-13T00:00:00.000Z",
+      "count": 243
+    }
+  ],
   "recentActivity": [
     {
-      "problemTitle": "Two Sum",
+      "problemTitle": "Word Search",
+      "difficulty": "MEDIUM",
+      "solvedAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "problemTitle": "Subsets II",
+      "difficulty": "MEDIUM",
+      "solvedAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "problemTitle": "Generate Parentheses",
       "difficulty": "EASY",
-      "solvedAt": "2024-01-01T10:00:00.000Z"
+      "solvedAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "problemTitle": "House Robber",
+      "difficulty": "MEDIUM",
+      "solvedAt": "2026-03-13T10:20:17.300Z"
+    },
+    {
+      "problemTitle": "Unique Paths",
+      "difficulty": "EASY",
+      "solvedAt": "2026-03-13T10:20:17.300Z"
     }
   ]
 }
@@ -449,7 +637,12 @@ Get public student profile by username (no authentication required).
 
 ### Base URL: `/api/admin`
 
-All endpoints require `Authorization: Bearer <access_token>` header and ADMIN role.
+All endpoints require `Authorization: Bearer <access_token>` header and appropriate ADMIN role.
+
+### Role-Based Access:
+- **SuperAdmin**: Full access to all endpoints
+- **Teacher**: Access to most endpoints (marked as Teacher+)
+- **Intern**: Limited read access only
 
 #### Get Cities
 **Endpoint:** `GET /api/admin/cities`
@@ -521,6 +714,8 @@ Get all topics.
 **Endpoint:** `POST /api/admin/topics`
 Create a new topic (Teacher and SuperAdmin only).
 
+**Required Roles:** Teacher, SuperAdmin
+
 **Request:**
 ```json
 {
@@ -547,6 +742,8 @@ Create a new topic (Teacher and SuperAdmin only).
 **Endpoint:** `PATCH /api/admin/topics/:id`
 Update an existing topic (Teacher and SuperAdmin only).
 
+**Required Roles:** Teacher, SuperAdmin
+
 **Request:**
 ```json
 {
@@ -571,6 +768,8 @@ Update an existing topic (Teacher and SuperAdmin only).
 #### Delete Topic (Teacher+)
 **Endpoint:** `DELETE /api/admin/topics/:id`
 Delete a topic (Teacher and SuperAdmin only).
+
+**Required Roles:** Teacher, SuperAdmin
 
 **Response:**
 ```json
@@ -622,6 +821,8 @@ Get all questions with optional filters.
 **Endpoint:** `POST /api/admin/questions`
 Create a new question (Teacher and SuperAdmin only).
 
+**Required Roles:** Teacher, SuperAdmin
+
 **Request:**
 ```json
 {
@@ -654,6 +855,8 @@ Create a new question (Teacher and SuperAdmin only).
 **Endpoint:** `PATCH /api/admin/questions/:id`
 Update an existing question (Teacher and SuperAdmin only).
 
+**Required Roles:** Teacher, SuperAdmin
+
 **Response:**
 ```json
 {
@@ -674,6 +877,8 @@ Update an existing question (Teacher and SuperAdmin only).
 **Endpoint:** `DELETE /api/admin/questions/:id`
 Delete a question (Teacher and SuperAdmin only).
 
+**Required Roles:** Teacher, SuperAdmin
+
 **Response:**
 ```json
 {
@@ -684,6 +889,8 @@ Delete a question (Teacher and SuperAdmin only).
 #### Bulk Upload Questions (Teacher+)
 **Endpoint:** `POST /api/admin/questions/bulk-upload`
 Upload multiple questions via CSV file (Teacher and SuperAdmin only).
+
+**Required Roles:** Teacher, SuperAdmin
 
 **Request:** `multipart/form-data` with `file` (CSV)
 
@@ -841,6 +1048,8 @@ Get all students with optional filters.
 **Endpoint:** `POST /api/admin/students`
 Create a new student (Teacher and SuperAdmin only).
 
+**Required Roles:** Teacher, SuperAdmin
+
 **Request:**
 ```json
 {
@@ -881,6 +1090,8 @@ Create a new student (Teacher and SuperAdmin only).
 **Endpoint:** `PATCH /api/admin/students/:id`
 Update student details (Teacher and SuperAdmin only).
 
+**Required Roles:** Teacher, SuperAdmin
+
 **Response:**
 ```json
 {
@@ -905,6 +1116,8 @@ Update student details (Teacher and SuperAdmin only).
 **Endpoint:** `DELETE /api/admin/students/:id`
 Delete a student (Teacher and SuperAdmin only).
 
+**Required Roles:** Teacher, SuperAdmin
+
 **Response:**
 ```json
 {
@@ -912,9 +1125,218 @@ Delete a student (Teacher and SuperAdmin only).
 }
 ```
 
+---
+
+## Batch-Specific Admin APIs
+
+### Base URL: `/api/admin/:batchSlug`
+
+All endpoints require `Authorization: Bearer <access_token>` header and ADMIN role.
+
+#### Get Topics for Batch
+**Endpoint:** `GET /api/admin/:batchSlug/topics`
+Get all topics for a specific batch.
+
+**Response:**
+```json
+{
+  "topics": [
+    {
+      "id": 1,
+      "topic_name": "Arrays",
+      "slug": "arrays",
+      "description": "Array data structures and algorithms",
+      "classCount": 5,
+      "questionCount": 25
+    }
+  ]
+}
+```
+
+#### Get Classes by Topic
+**Endpoint:** `GET /api/admin/:batchSlug/topics/:topicSlug/classes`
+Get all classes for a specific topic in a batch.
+
+**Response:**
+```json
+{
+  "classes": [
+    {
+      "id": 1,
+      "class_name": "Basic Arrays",
+      "slug": "basic-arrays",
+      "duration_minutes": 120,
+      "description": "Introduction to arrays",
+      "totalQuestions": 10,
+      "solvedQuestions": 7,
+      "pdf_url": "https://example.com/notes.pdf"
+    }
+  ]
+}
+```
+
+#### Create Class in Topic
+**Endpoint:** `POST /api/admin/:batchSlug/topics/:topicSlug/classes`
+Create a new class under a topic (Teacher and SuperAdmin only).
+
+**Required Roles:** Teacher, SuperAdmin
+
+**Request:**
+```json
+{
+  "class_name": "Advanced Arrays",
+  "description": "Advanced array concepts",
+  "duration_minutes": 90,
+  "pdf_url": "https://example.com/advanced-arrays.pdf"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Class created successfully",
+  "class": {
+    "id": 2,
+    "class_name": "Advanced Arrays",
+    "slug": "advanced-arrays",
+    "duration_minutes": 90,
+    "description": "Advanced array concepts",
+    "pdf_url": "https://example.com/advanced-arrays.pdf"
+  }
+}
+```
+
+#### Get Class Details
+**Endpoint:** `GET /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug`
+Get detailed class information.
+
+**Response:**
+```json
+{
+  "id": 1,
+  "class_name": "Basic Arrays",
+  "slug": "basic-arrays",
+  "duration_minutes": 120,
+  "description": "Introduction to arrays",
+  "totalQuestions": 10,
+  "solvedQuestions": 7,
+  "pdf_url": "https://example.com/notes.pdf",
+  "questions": [
+    {
+      "id": 1,
+      "question_name": "Two Sum",
+      "level": "EASY",
+      "platform": "LEETCODE",
+      "type": "HOMEWORK",
+      "isAssigned": true
+    }
+  ]
+}
+```
+
+#### Update Class
+**Endpoint:** `PATCH /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug`
+Update class details (Teacher and SuperAdmin only).
+
+**Required Roles:** Teacher, SuperAdmin
+
+**Request:**
+```json
+{
+  "class_name": "Updated Basic Arrays",
+  "description": "Updated description",
+  "duration_minutes": 130,
+  "pdf_url": "https://example.com/updated-notes.pdf"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Class updated successfully",
+  "class": {
+    "id": 1,
+    "class_name": "Updated Basic Arrays",
+    "slug": "basic-arrays",
+    "duration_minutes": 130,
+    "description": "Updated description",
+    "pdf_url": "https://example.com/updated-notes.pdf"
+  }
+}
+```
+
+#### Delete Class
+**Endpoint:** `DELETE /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug`
+Delete a class (Teacher and SuperAdmin only).
+
+**Required Roles:** Teacher, SuperAdmin
+
+**Response:**
+```json
+{
+  "message": "Class deleted successfully"
+}
+```
+
+#### Assign Questions to Class
+**Endpoint:** `POST /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions`
+Assign questions to a class (Teacher and SuperAdmin only).
+
+**Required Roles:** Teacher, SuperAdmin
+
+**Request:**
+```json
+{
+  "questionIds": [1, 2, 3, 4, 5]
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Questions assigned to class successfully",
+  "assignedCount": 5
+}
+```
+
+#### Get Assigned Questions of Class
+**Endpoint:** `GET /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions`
+Get all questions assigned to a class.
+
+**Response:**
+```json
+{
+  "questions": [
+    {
+      "id": 1,
+      "question_name": "Two Sum",
+      "level": "EASY",
+      "platform": "LEETCODE",
+      "type": "HOMEWORK",
+      "isAssigned": true
+    }
+  ]
+}
+```
+
+#### Remove Question from Class
+**Endpoint:** `DELETE /api/admin/:batchSlug/topics/:topicSlug/classes/:classSlug/questions/:questionId`
+Remove a question from a class (Teacher and SuperAdmin only).
+
+**Required Roles:** Teacher, SuperAdmin
+
+**Response:**
+```json
+{
+  "message": "Question removed from class successfully"
+}
+```
+
 #### Add Student Progress (Teacher+)
 **Endpoint:** `POST /api/admin/students/progress`
 Manually add/update student progress (Teacher and SuperAdmin only).
+
+**Required Roles:** Teacher, SuperAdmin
 
 **Request:**
 ```json
@@ -1027,6 +1449,10 @@ student_id,name,email,username,total_solved,easy_solved,medium_solved,hard_solve
 ### Base URL: `/api/superadmin`
 
 All endpoints require `Authorization: Bearer <access_token>` header and SUPERADMIN role.
+
+### Role-Based Access:
+- **SuperAdmin**: Full access to all SuperAdmin endpoints
+- **Teacher/Intern**: No access to SuperAdmin endpoints
 
 #### Create City
 **Endpoint:** `POST /api/superadmin/cities`
