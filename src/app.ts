@@ -10,6 +10,7 @@ import { errorHandler } from './middlewares/errorHandler.middleware';
 import studentRoutes from "./routes/student.routes";
 import adminRoutes from "./routes/admin.routes";
 import superadminRoutes from './routes/superadmin.routes';
+import publicRoutes from './routes/public.routes';
 import { startSyncJob } from './jobs/sync.job';
 import s3Routes from './routes/s3.routes';
 dotenv.config();
@@ -37,6 +38,7 @@ app.use('/api/s3', s3Routes);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use("/api/students", studentRoutes);
+app.use('/api', publicRoutes);                     // Public routes (cities, batches)
 app.use('/api/admin', adminRoutes);              // Teacher & Intern & admin
 app.use('/api/superadmin',superadminRoutes);    // Superadmin ONLY
 
