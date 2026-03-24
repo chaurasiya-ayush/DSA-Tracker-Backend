@@ -18,10 +18,7 @@ export const createTopicService = async ({ topic_name, photo }: { topic_name: st
   }
 
   // Generate slug from topic name
-  const baseSlug = slugify(topic_name, {
-    lower: true,
-    strict: true,
-  });
+  const baseSlug = slugify(topic_name).toLowerCase();
 
   let finalSlug = baseSlug;
   let counter = 1;
@@ -103,7 +100,72 @@ export const getTopicsForBatchService = async ({ batchId, query }: GetTopicsForB
     throw new Error("Batch not found");
   }
 
-  return batch;
+  // Extract unique topics from classes and format them
+  const topicMap = new Map();
+  
+  batch.classes.forEach(cls => {
+    if (!topicMap.has(cls.topic.id)) {
+      topicMap.set(cls.topic.id, {
+        id: cls.topic.id.toString(),
+        topic_name: cls.topic.topic_name,
+        slug: cls.topic.slug,
+        photo_url: cls.topic.photo_url,
+        classCount: 0,
+        questionCount: 0,
+        firstClassCreated_at: cls.created_at
+      });
+    }
+    
+    // Update class count for this topic
+    const topic = topicMap.get(cls.topic.id);
+    topic.classCount = (topic.classCount || 0) + 1;
+    
+    // Count questions for this class
+    topic.questionCount = (topic.questionCount || 0) + cls.questionVisibility.length;
+  });
+
+  const topics = Array.from(topicMap.values());
+  
+  // Apply search filter if provided
+  let filteredTopics = topics;
+  if (query?.search) {
+    filteredTopics = topics.filter(topic => 
+      topic.topic_name.toLowerCase().includes(query.search.toLowerCase())
+    );
+  }
+
+  // Apply sorting
+  const sortBy = query?.sortBy || 'recent';
+  filteredTopics.sort((a, b) => {
+    switch (sortBy) {
+      case 'oldest':
+        return new Date(a.firstClassCreated_at || 0).getTime() - new Date(b.firstClassCreated_at || 0).getTime();
+      case 'classes':
+        return (b.classCount || 0) - (a.classCount || 0);
+      case 'questions':
+        return (b.questionCount || 0) - (a.questionCount || 0);
+      case 'recent':
+      default:
+        return new Date(b.firstClassCreated_at || 0).getTime() - new Date(a.firstClassCreated_at || 0).getTime();
+    }
+  });
+
+  // Apply pagination
+  const page = parseInt(query?.page as string) || 1;
+  const limit = parseInt(query?.limit as string) || 10;
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const paginatedTopics = filteredTopics.slice(startIndex, endIndex);
+
+  return {
+    topics: paginatedTopics,
+    pagination: {
+      total: filteredTopics.length,
+      totalPages: Math.ceil(filteredTopics.length / limit),
+      page,
+      limit
+    }
+  };
 };
 
 interface UpdateTopicInput {
@@ -164,10 +226,7 @@ export const updateTopicService = async ({ topicSlug, topic_name, photo, removeP
       throw new Error("Topic already exists");
     }
 
-    const baseSlug = slugify(topic_name, {
-      lower: true,
-      strict: true,
-    });
+    const baseSlug = slugify(topic_name).toLowerCase();
 
     finalSlug = baseSlug;
     let counter = 1;

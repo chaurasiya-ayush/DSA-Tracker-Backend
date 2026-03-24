@@ -206,6 +206,7 @@ export const getPublicStudentProfileService = async (username: string) => {
 
     return {
         student: {
+            id: student.id,
             name: student.name,
             username: student.username,
             city: student.city?.city_name || null,

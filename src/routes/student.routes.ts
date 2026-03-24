@@ -2,11 +2,12 @@ import { Router } from "express";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { isStudent } from "../middlewares/role.middleware";
 import { extractStudentInfo } from "../middlewares/student.middleware";
+import { optionalAuth } from "../middlewares/optionalAuth.middleware";
 import { getTopicsWithBatchProgress, getTopicOverviewWithClassesSummary } from "../controllers/topic.controller";
 import { getClassDetailsWithFullQuestions } from "../controllers/class.controller";
 import { getAllQuestionsWithFilters } from "../controllers/questionVisibility.controller";
 import { getStudentLeaderboard } from "../controllers/leaderboard.controller";
-import { getStudentProfile, getPublicStudentProfile } from "../controllers/studentProfile.controller";
+import { getPublicStudentProfile } from "../controllers/studentProfile.controller";
 import { getCurrentStudent } from "../controllers/student.controller";
 import { uploadSingle } from '../middlewares/uploadphoto.middleware';
 import { uploadProfileImage, deleteProfileImage, getProfileImage } from '../controllers/profileImage.controller';
@@ -15,10 +16,10 @@ import { completeProfile } from "../controllers/profile.controller";
 
 const router = Router();
 
-// Public route - no authentication required
-router.get("/profile/:username", getPublicStudentProfile); // Public student profile by username
+// Public route - optional authentication for canEdit flag
+router.get("/profile/:username", optionalAuth, getPublicStudentProfile);
 
-// All routes require authentication + STUDENT role + student info extraction
+// All routes below require authentication + STUDENT role + student info extraction
 router.use(verifyToken, isStudent, extractStudentInfo);
 
 // Current student info (lightweight - for header/homepage)
@@ -45,9 +46,6 @@ router.post("/profile-image", uploadSingle, uploadProfileImage);  // Upload/Upda
 router.delete("/profile-image", deleteProfileImage);              // Delete profile image
 router.get("/profile-image", getProfileImage); // Get profile image URL
 
-
-
-router.get("/profile", getStudentProfile); // Complete student profile with all sections
 router.put("/profile", completeProfile); // Update student profile (leetcode, gfg, etc)
 
 export default router;
