@@ -12,6 +12,7 @@ import { getCurrentStudent } from "../controllers/student.controller";
 import { uploadSingle } from '../middlewares/uploadphoto.middleware';
 import { uploadProfileImage, deleteProfileImage, getProfileImage } from '../controllers/profileImage.controller';
 import { getAllBatches } from "../controllers/batch.controller";
+import { getAllCities } from "../controllers/city.controller";
 import { completeProfile } from "../controllers/profile.controller";
 
 const router = Router();
@@ -27,6 +28,9 @@ router.get("/me", getCurrentStudent);
 
 // Batches
 router.get("/batches", getAllBatches);
+
+// Cities
+router.get("/cities", getAllCities);
 
 // ===== TOPICS ROUTES =====
 router.get("/topics", getTopicsWithBatchProgress); // All topics with batch-specific classes, total questions per batch, and topic-specific solved question count (frontend will calculate progress percentage)
