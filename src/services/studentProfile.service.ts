@@ -52,7 +52,8 @@ export const getStudentProfileService = async (studentId: number) => {
                 question: {
                     select: {
                         question_name: true,
-                        level: true
+                        level: true,
+                        question_link: true
                     }
                 }
             },
@@ -122,7 +123,8 @@ export const getStudentProfileService = async (studentId: number) => {
             })),
 
             recentActivity: recentActivity.map((a) => ({
-                problemTitle: a.question.question_name,
+                question_name: a.question.question_name,
+                question_link: a.question.question_link,
                 difficulty: a.question.level,
                 solvedAt: a.sync_at
             }))
@@ -185,7 +187,8 @@ export const getPublicStudentProfileService = async (username: string) => {
             question: {
                 select: {
                     question_name: true,
-                    level: true
+                    level: true,
+                    question_link: true
                 }
             }
         },
@@ -253,7 +256,8 @@ export const getPublicStudentProfileService = async (username: string) => {
         })),
 
         recentActivity: recentActivity.map((a) => ({
-            problemTitle: a.question.question_name,
+            question_name: a.question.question_name,
+            question_link: a.question.question_link,
             difficulty: a.question.level,
             solvedAt: a.sync_at
         }))

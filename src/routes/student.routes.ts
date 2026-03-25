@@ -12,7 +12,7 @@ import { getCurrentStudent } from "../controllers/student.controller";
 import { updateStudentProfile } from "../controllers/updateStudentProfile.controller";
 import { getStudentById } from "../controllers/getStudentById.controller";
 import { uploadSingle } from '../middlewares/uploadphoto.middleware';
-import { uploadProfileImage, deleteProfileImage, getProfileImage } from '../controllers/profileImage.controller';
+import { uploadProfileImage, deleteProfileImage,} from '../controllers/profileImage.controller';
 import { getAllBatches } from "../controllers/batch.controller";
 import { getAllCities } from "../controllers/city.controller";
 import { completeProfile } from "../controllers/profile.controller";
@@ -54,9 +54,7 @@ router.post("/leaderboard", getStudentLeaderboard); // Single student leaderboar
 // ===== PROFILE IMAGE ROUTES =====
 router.post("/profile-image", uploadSingle, uploadProfileImage);  // Upload/Update profile image
 router.delete("/profile-image", deleteProfileImage);              // Delete profile image
-router.get("/profile-image", getProfileImage); // Get profile image URL
 
-router.put("/profile", completeProfile); // Update student profile (leetcode, gfg, etc)
 router.patch("/username", updateUsername); // Update username only
 
 
