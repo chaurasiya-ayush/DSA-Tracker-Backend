@@ -17,6 +17,7 @@ import { getAllBatches } from "../controllers/batch.controller";
 import { getAllCities } from "../controllers/city.controller";
 import { completeProfile } from "../controllers/profile.controller";
 import { updateUsername } from "../controllers/username.controller";
+import { getRecentQuestions } from "../controllers/recentQuestions.controller";
 
 const router = Router();
 
@@ -47,6 +48,7 @@ router.get("/topics/:topicSlug/classes/:classSlug", getClassDetailsWithFullQuest
 
 // ===== Global  QUESTIONS ROUTES =====
 router.get("/addedQuestions", getAllQuestionsWithFilters); // All questions with filters and solved status
+router.get("/recent-questions", getRecentQuestions); // Recently added questions (last 7 days by default)
 
 // ===== LEADERBOARD ROUTES =====
 router.post("/leaderboard", getStudentLeaderboard); // Single student leaderboard with top 10 and personal rank
