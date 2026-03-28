@@ -6,9 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getClassDetailsWithFullQuestionsService = exports.deleteClassService = exports.updateClassService = exports.getClassDetailsService = exports.createClassInTopicService = exports.getClassesByTopicService = void 0;
 const slugify_1 = __importDefault(require("slugify"));
 const prisma_1 = __importDefault(require("../config/prisma"));
+const ApiError_1 = require("../utils/ApiError");
 const getClassesByTopicService = async ({ batchId, topicSlug, page = 1, limit = 20, search = '', }) => {
     if (!topicSlug) {
-        throw new Error("Invalid topic slug");
+        throw new ApiError_1.ApiError(400, "Invalid topic slug");
     }
     // Build where clause
     const whereClause = {
@@ -53,7 +54,7 @@ const getClassesByTopicService = async ({ batchId, topicSlug, page = 1, limit = 
             where: { slug: topicSlug },
         });
         if (!topicExists) {
-            throw new Error("Topic not found");
+            throw new ApiError_1.ApiError(400, "Topic not found");
         }
     }
     const formatted = classes.map((cls) => ({
@@ -81,10 +82,10 @@ exports.getClassesByTopicService = getClassesByTopicService;
 const createClassInTopicService = async ({ batchId, topicSlug, class_name, description, pdf_url, duration_minutes, class_date, }) => {
     console.log("Creating class with:", { batchId, topicSlug, class_name, class_date });
     if (!topicSlug) {
-        throw new Error("Invalid topic slug");
+        throw new ApiError_1.ApiError(400, "Invalid topic slug");
     }
     if (!class_name) {
-        throw new Error("Class name is required");
+        throw new ApiError_1.ApiError(400, "Class name is required");
     }
     // 1️⃣ Find Topic
     const topic = await prisma_1.default.topic.findUnique({
@@ -92,7 +93,7 @@ const createClassInTopicService = async ({ batchId, topicSlug, class_name, descr
     });
     console.log("Found topic:", topic);
     if (!topic) {
-        throw new Error(`Topic not found with slug: ${topicSlug}`);
+        throw new ApiError_1.ApiError(400, `Topic not found with slug: ${topicSlug}`);
     }
     // 2️⃣ Check duplicate inside same topic + batch (unique across both)
     const duplicateName = await prisma_1.default.class.findFirst({
@@ -103,7 +104,7 @@ const createClassInTopicService = async ({ batchId, topicSlug, class_name, descr
         },
     });
     if (duplicateName) {
-        throw new Error("Class with same name already exists in this topic");
+        throw new ApiError_1.ApiError(400, "Class with same name already exists in this topic");
     }
     // 3️⃣ Generate slug unique across topic + batch
     const baseSlug = (0, slugify_1.default)(class_name, {
@@ -128,12 +129,12 @@ const createClassInTopicService = async ({ batchId, topicSlug, class_name, descr
             processedDate = new Date(class_date);
             // Validate date
             if (isNaN(processedDate.getTime())) {
-                throw new Error("Invalid date format");
+                throw new ApiError_1.ApiError(400, "Invalid date format");
             }
             console.log("Processed date:", processedDate);
         }
         catch (error) {
-            throw new Error("Invalid date format. Use valid date string");
+            throw new ApiError_1.ApiError(400, "Invalid date format. Use valid date string");
         }
     }
     const newClass = await prisma_1.default.class.create({
@@ -153,17 +154,17 @@ const createClassInTopicService = async ({ batchId, topicSlug, class_name, descr
 exports.createClassInTopicService = createClassInTopicService;
 const getClassDetailsService = async ({ batchId, topicSlug, classSlug, }) => {
     if (!classSlug) {
-        throw new Error("Invalid class slug");
+        throw new ApiError_1.ApiError(400, "Invalid class slug");
     }
     if (!topicSlug) {
-        throw new Error("Invalid topic slug");
+        throw new ApiError_1.ApiError(400, "Invalid topic slug");
     }
     // Find topic first
     const topic = await prisma_1.default.topic.findUnique({
         where: { slug: topicSlug },
     });
     if (!topic) {
-        throw new Error("Topic not found");
+        throw new ApiError_1.ApiError(400, "Topic not found");
     }
     const cls = await prisma_1.default.class.findFirst({
         where: {
@@ -187,7 +188,7 @@ const getClassDetailsService = async ({ batchId, topicSlug, classSlug, }) => {
         },
     });
     if (!cls) {
-        throw new Error("Class not found in this topic and batch");
+        throw new ApiError_1.ApiError(400, "Class not found in this topic and batch");
     }
     return {
         id: cls.id,
@@ -205,17 +206,17 @@ const getClassDetailsService = async ({ batchId, topicSlug, classSlug, }) => {
 exports.getClassDetailsService = getClassDetailsService;
 const updateClassService = async ({ batchId, topicSlug, classSlug, class_name, description, pdf_url, duration_minutes, class_date, }) => {
     if (!classSlug) {
-        throw new Error("Invalid class slug");
+        throw new ApiError_1.ApiError(400, "Invalid class slug");
     }
     if (!topicSlug) {
-        throw new Error("Invalid topic slug");
+        throw new ApiError_1.ApiError(400, "Invalid topic slug");
     }
     // Find topic first
     const topic = await prisma_1.default.topic.findUnique({
         where: { slug: topicSlug },
     });
     if (!topic) {
-        throw new Error("Topic not found");
+        throw new ApiError_1.ApiError(400, "Topic not found");
     }
     const existingClass = await prisma_1.default.class.findFirst({
         where: {
@@ -225,7 +226,7 @@ const updateClassService = async ({ batchId, topicSlug, classSlug, class_name, d
         },
     });
     if (!existingClass) {
-        throw new Error("Class not found in this topic and batch");
+        throw new ApiError_1.ApiError(400, "Class not found in this topic and batch");
     }
     const finalClassName = class_name ?? existingClass.class_name;
     // Prevent duplicate name in same topic + batch
@@ -238,7 +239,7 @@ const updateClassService = async ({ batchId, topicSlug, classSlug, class_name, d
         },
     });
     if (duplicate) {
-        throw new Error("Class with same name already exists in this topic");
+        throw new ApiError_1.ApiError(400, "Class with same name already exists in this topic");
     }
     let newSlug = existingClass.slug;
     if (class_name) {
@@ -276,14 +277,14 @@ const updateClassService = async ({ batchId, topicSlug, classSlug, class_name, d
 exports.updateClassService = updateClassService;
 const deleteClassService = async ({ batchId, topicSlug, classSlug, }) => {
     if (!topicSlug) {
-        throw new Error("Invalid topic slug");
+        throw new ApiError_1.ApiError(400, "Invalid topic slug");
     }
     // Find topic first
     const topic = await prisma_1.default.topic.findUnique({
         where: { slug: topicSlug },
     });
     if (!topic) {
-        throw new Error("Topic not found");
+        throw new ApiError_1.ApiError(400, "Topic not found");
     }
     const existingClass = await prisma_1.default.class.findFirst({
         where: {
@@ -293,13 +294,13 @@ const deleteClassService = async ({ batchId, topicSlug, classSlug, }) => {
         },
     });
     if (!existingClass) {
-        throw new Error("Class not found in this topic and batch");
+        throw new ApiError_1.ApiError(400, "Class not found in this topic and batch");
     }
     const questionCount = await prisma_1.default.questionVisibility.count({
         where: { class_id: existingClass.id },
     });
     if (questionCount > 0) {
-        throw new Error("Cannot delete class with assigned questions");
+        throw new ApiError_1.ApiError(400, "Cannot delete class with assigned questions");
     }
     await prisma_1.default.class.delete({
         where: { id: existingClass.id },
@@ -343,7 +344,7 @@ const getClassDetailsWithFullQuestionsService = async ({ studentId, batchId, top
         }
     });
     if (!classData) {
-        throw new Error("Class not found");
+        throw new ApiError_1.ApiError(400, "Class not found");
     }
     // Get student's solved questions for this class
     const questionIds = classData.questionVisibility.map(qv => qv.question_id);

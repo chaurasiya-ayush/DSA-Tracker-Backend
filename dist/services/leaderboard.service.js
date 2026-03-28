@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStudentRankDirect = exports.getLeaderboardWithPagination = exports.getCityYearMapping = exports.getAvailableCities = exports.getAvailableYears = void 0;
 const prisma_1 = __importDefault(require("../config/prisma"));
+const ApiError_1 = require("../utils/ApiError");
 const getAvailableYears = async () => {
     const years = await prisma_1.default.batch.findMany({
         select: { year: true },
@@ -84,12 +85,12 @@ const getLeaderboardWithPagination = async (filters, pagination, search) => {
         // Validate type parameter
         const validTypes = ["all", "weekly", "monthly"];
         if (!validTypes.includes(type)) {
-            throw new Error(`Invalid type parameter. Must be one of: ${validTypes.join(", ")}`);
+            throw new ApiError_1.ApiError(400, `Invalid type parameter. Must be one of: ${validTypes.join(", ")}`);
         }
         // Validate year parameter - get from database
         const validYears = await (0, exports.getAvailableYears)();
         if (year && year !== "all" && !validYears.includes(year)) {
-            throw new Error(`Invalid year parameter. Must be one of: ${validYears.join(", ")}`);
+            throw new ApiError_1.ApiError(400, `Invalid year parameter. Must be one of: ${validYears.join(", ")}`);
         }
         // Year filter is required for meaningful comparison
         if (!year || year === "all") {
@@ -243,23 +244,23 @@ const getLeaderboardWithPagination = async (filters, pagination, search) => {
         if (error instanceof Error) {
             // Check for specific database errors
             if (error.message.includes('parameter')) {
-                throw new Error(`Database query parameter error: ${error.message}. This usually indicates a problem with SQL parameter binding.`);
+                throw new ApiError_1.ApiError(400, `Database query parameter error: ${error.message}. This usually indicates a problem with SQL parameter binding.`);
             }
             else if (error.message.includes('42P02')) {
-                throw new Error(`Database parameter error: Invalid parameter placeholder in SQL query. Please check the query construction.`);
+                throw new ApiError_1.ApiError(400, `Database parameter error: Invalid parameter placeholder in SQL query. Please check the query construction.`);
             }
             else if (error.message.includes('42703')) {
-                throw new Error(`Database column error: A referenced column does not exist. ${error.message}`);
+                throw new ApiError_1.ApiError(400, `Database column error: A referenced column does not exist. ${error.message}`);
             }
             else if (error.message.includes('42P01')) {
-                throw new Error(`Database table error: A referenced table does not exist. ${error.message}`);
+                throw new ApiError_1.ApiError(400, `Database table error: A referenced table does not exist. ${error.message}`);
             }
             else {
-                throw new Error(`Leaderboard pagination error: ${error.message}`);
+                throw new ApiError_1.ApiError(400, `Leaderboard pagination error: ${error.message}`);
             }
         }
         else {
-            throw new Error(`Unknown leaderboard pagination error: ${String(error)}`);
+            throw new ApiError_1.ApiError(400, `Unknown leaderboard pagination error: ${String(error)}`);
         }
     }
 };
@@ -320,23 +321,23 @@ const getStudentRankDirect = async (studentId, filters) => {
         if (error instanceof Error) {
             // Check for specific database errors
             if (error.message.includes('parameter')) {
-                throw new Error(`Database query parameter error: ${error.message}. This usually indicates a problem with SQL parameter binding.`);
+                throw new ApiError_1.ApiError(400, `Database query parameter error: ${error.message}. This usually indicates a problem with SQL parameter binding.`);
             }
             else if (error.message.includes('42P02')) {
-                throw new Error(`Database parameter error: Invalid parameter placeholder in SQL query. Please check the query construction.`);
+                throw new ApiError_1.ApiError(400, `Database parameter error: Invalid parameter placeholder in SQL query. Please check the query construction.`);
             }
             else if (error.message.includes('42703')) {
-                throw new Error(`Database column error: A referenced column does not exist. ${error.message}`);
+                throw new ApiError_1.ApiError(400, `Database column error: A referenced column does not exist. ${error.message}`);
             }
             else if (error.message.includes('42P01')) {
-                throw new Error(`Database table error: A referenced table does not exist. ${error.message}`);
+                throw new ApiError_1.ApiError(400, `Database table error: A referenced table does not exist. ${error.message}`);
             }
             else {
-                throw new Error(`Student rank lookup error: ${error.message}`);
+                throw new ApiError_1.ApiError(400, `Student rank lookup error: ${error.message}`);
             }
         }
         else {
-            throw new Error(`Unknown student rank lookup error: ${String(error)}`);
+            throw new ApiError_1.ApiError(400, `Unknown student rank lookup error: ${String(error)}`);
         }
     }
 };

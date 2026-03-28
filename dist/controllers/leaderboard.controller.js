@@ -6,8 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getLeaderboardByType = exports.getLeaderboardPost = exports.getStudentLeaderboard = exports.getAdminLeaderboard = exports.getAvailableYearsController = void 0;
 const leaderboard_service_1 = require("../services/leaderboard.service");
 const prisma_1 = __importDefault(require("../config/prisma"));
+const asyncHandler_1 = require("../utils/asyncHandler");
 // Get available years for leaderboard filters
-const getAvailableYearsController = async (req, res) => {
+exports.getAvailableYearsController = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     try {
         const years = await (0, leaderboard_service_1.getAvailableYears)();
         return res.status(200).json({
@@ -22,10 +23,9 @@ const getAvailableYearsController = async (req, res) => {
             message: error instanceof Error ? error.message : "Failed to fetch available years"
         });
     }
-};
-exports.getAvailableYearsController = getAvailableYearsController;
+});
 // Admin Leaderboard API with pagination and search
-const getAdminLeaderboard = async (req, res) => {
+exports.getAdminLeaderboard = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     try {
         // Step 1 — Read filters from request body
         const body = req.body || {};
@@ -95,10 +95,9 @@ const getAdminLeaderboard = async (req, res) => {
             message: error instanceof Error ? error.message : "An error occurred"
         });
     }
-};
-exports.getAdminLeaderboard = getAdminLeaderboard;
+});
 // Student Leaderboard API with top 10 and personal rank
-const getStudentLeaderboard = async (req, res) => {
+exports.getStudentLeaderboard = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     try {
         // Step 1 — Get student ID from auth middleware
         const studentId = req.studentId;
@@ -229,10 +228,9 @@ const getStudentLeaderboard = async (req, res) => {
             message: error instanceof Error ? error.message : "An error occurred"
         });
     }
-};
-exports.getStudentLeaderboard = getStudentLeaderboard;
+});
 // Legacy endpoints for backward compatibility
-const getLeaderboardPost = async (req, res) => {
+exports.getLeaderboardPost = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     try {
         const body = req.body || {};
         const { city, year, type } = body;
@@ -256,9 +254,8 @@ const getLeaderboardPost = async (req, res) => {
             message: error instanceof Error ? error.message : "An error occurred"
         });
     }
-};
-exports.getLeaderboardPost = getLeaderboardPost;
-const getLeaderboardByType = async (req, res) => {
+});
+exports.getLeaderboardByType = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     try {
         const studentId = req.studentId;
         if (!studentId) {
@@ -377,5 +374,4 @@ const getLeaderboardByType = async (req, res) => {
             message: error instanceof Error ? error.message : "An error occurred"
         });
     }
-};
-exports.getLeaderboardByType = getLeaderboardByType;
+});
